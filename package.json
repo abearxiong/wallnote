@@ -1,0 +1,60 @@
+{
+  "name": "vite-react",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:web": "cross-env WEB_DEV=true vite --mode web",
+    "build": "vite build",
+    "lint": "eslint .",
+    "deploy": "rsync -avz --delete dist/ light:~/apps/ai/dist",
+    "preview": "vite preview",
+    "pub": "envision deploy ./dist -k vite-react -v 0.0.1",
+    "ev": "npm run build && npm run deploy"
+  },
+  "stackblitz": {
+    "startCommand": "npm dev:web"
+  },
+  "author": "abearxiong <xiongxiao@xiongxiao.me>",
+  "license": "MIT",
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@kevisual/query": "0.0.7-alpha.3",
+    "@kevisual/router": "0.0.6-alpha-5",
+    "@kevisual/system-ui": "^0.0.3",
+    "@kevisual/ui": "^0.0.4-alpha-1",
+    "antd": "^5.24.1",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
+    "immer": "^10.1.1",
+    "lodash-es": "^4.17.21",
+    "nanoid": "^5.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router": "^7.2.0",
+    "react-router-dom": "^7.2.0",
+    "react-toastify": "^11.0.3",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@kevisual/types": "^0.0.6",
+    "@tailwindcss/vite": "^4.0.7",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.20.1",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss": "^4.0.7",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.1.1"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Node.js 22 Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "runArgs": [
+    "--env",
+    "TZ=Asia/Shanghai"
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "/bin/bash"，
+    "terminal.integrated.env.linux": {
+      "TZ": "Asia/Shanghai"
+    }
+  },
+  "remoteEnv": {
+    "TZ": "Asia/Shanghai"
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint"
+  ],
+  "postCreateCommand": "sudo ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai | sudo tee /etc/timezone && pnpm install -g @kevisual/envision-cli@latest && npm install"
+}

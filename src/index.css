@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer components {
+  .test-loading {
+    @apply w-20 h-20 bg-gray-300 rounded-full animate-spin;
+  }
+}
