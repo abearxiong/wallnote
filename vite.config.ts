@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, ProxyOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
@@ -9,11 +9,34 @@ const version = pkgs.version || '0.0.1';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const basename = isDev ? '/' : '/username/app';
+const basename = isDev ? '/' : '/apps/wallnote';
 const plugins = []
 const isWeb = false;
+const isKevisual = true;
+
 if(isWeb) {
   plugins.push(basicSsl())
+}
+let proxy:Record<string, string | ProxyOptions> = {
+}
+if(isKevisual) {
+  proxy = {
+    '/api': {
+      target: 'https://kevisual.xiongxiao.me',
+      changeOrigin: true,
+    },
+    '/api/router': {
+      target: 'ws://localhost:3000',
+      changeOrigin: true,
+      ws: true,
+      rewriteWsOrigin: true,
+      rewrite: (path) => path.replace(/^\/api/, '/api'),
+    },
+    '/root/center': {
+      target: 'https://kevisual.xiongxiao.me',
+      changeOrigin: true,
+    },
+  }
 }
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -48,6 +71,7 @@ export default defineConfig({
         rewriteWsOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
+      ...proxy,
     },
   },
 });

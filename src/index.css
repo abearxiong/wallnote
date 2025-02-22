@@ -1,7 +1,35 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
+@import './pages/wall/modules/CustomNode.css';
 @layer components {
-  .test-loading {
-    @apply w-20 h-20 bg-gray-300 rounded-full animate-spin;
+  .node-editor {
+    @apply w-20 h-20 bg-gray-300 bg-white;
+  }
+}
+
+html,
+body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+  font-size: 16px;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+.react-flow__attribution {
+  display: none;
+}
+.drawer-editor {
+  .tiptap {
+    border: unset;
   }
 }
