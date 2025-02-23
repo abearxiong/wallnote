@@ -104,18 +104,21 @@ export const SaveModal = () => {
       description: values.description,
       summary: values.summary,
       tags: values.tags,
-      markType: 'wall' as 'wall',
+      markType: 'wallnote' as 'wallnote',
       data,
     };
-    const res = await userWallStore.saveWall(fromData, { refresh: true });
+    const loading = message.loading('保存中...');
+    const res = await userWallStore.saveWall(fromData, { refresh: false });
+    message.close(loading);
     if (res.code === 200) {
       setShowFormDialog(false);
       if (!id) {
         // 新创建
         const data = res.data;
+        message.info('redirect to edit page');
         wallStore.clear();
         setTimeout(() => {
-          navigate(`/wall/${data.id}`);
+          navigate(`/edit/${data.id}`);
         }, 2000);
       } else {
         // 编辑

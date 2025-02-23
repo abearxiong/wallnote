@@ -33,3 +33,13 @@ body {
     border: unset;
   }
 }
+
+.markdown-body,.tiptap {
+  ul,
+  li {
+    list-style: unset;
+  }
+  ol {
+    list-style: decimal;
+  }
+}

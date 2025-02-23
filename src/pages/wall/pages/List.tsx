@@ -22,7 +22,11 @@ export const List = () => {
   };
   return (
     <div className='p-4 bg-white w-full h-full flex flex-col'>
-      <div className='flex justify-between h-10 items-center'>
+      <div
+        className='flex justify-between h-10 items-center'
+        onClick={() => {
+          navigate('/');
+        }}>
         <div className='text-2xl font-bold'>Wall Note</div>
       </div>
       <div className='flex flex-col flex-grow overflow-hidden'>
@@ -33,7 +37,7 @@ export const List = () => {
                 key={wall.id}
                 className='p-4 border border-gray-200 w-80 rounded-md'
                 onClick={() => {
-                  navigate(`/wall/${wall.id}`);
+                  navigate(`/edit/${wall.id}`);
                 }}>
                 <div>
                   <div>{wall.title}</div>

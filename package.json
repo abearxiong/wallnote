@@ -1,7 +1,7 @@
 {
   "name": "wallnote",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "user": "apps",
   "scripts": {
@@ -12,7 +12,7 @@
     "deploy": "rsync -avz --delete dist/ light:~/apps/ai/dist",
     "preview": "vite preview",
     "prepub": "envision switchOrg apps",
-    "pub": "envision deploy ./dist -k wallnote -v 0.0.2 -y y",
+    "pub": "envision deploy ./dist -k wallnote -v 0.0.3 -y y",
     "ev": "npm run build && npm run deploy"
   },
   "stackblitz": {
@@ -40,6 +40,7 @@
     "antd": "^5.24.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",
     "idb": "^8.0.2",
     "idb-keyval": "^6.2.1",

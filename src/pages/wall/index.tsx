@@ -30,6 +30,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { SaveModal } from './modules/FormDialog';
 import { useTabNode } from './hooks/tab-node';
 import { Button } from '@mui/material';
+import { useListenPaster } from './hooks/listen-copy';
+import { ContextMenu } from './modules/ContextMenu';
 type NodeData = {
   id: string;
   position: XYPosition;
@@ -41,11 +43,17 @@ export function FlowContent() {
   const wallStore = useWallStore((state) => state);
   const store = useStore((state) => state);
   const [mount, setMount] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+
   const _onNodesChange = useCallback((changes: NodeChange[]) => {
     const [change] = changes;
+
+    if (change.type === 'remove') {
+      wallStore.saveNodes(reactFlowInstance.getNodes().filter((item) => item.id !== change.id));
+    }
     if (change.type === 'position' && change.dragging === false) {
       // console.log('position changes', change);
-      getNewNodes();
+      getNewNodes(false);
     }
     onNodesChange(changes);
   }, []);
@@ -60,9 +68,10 @@ export function FlowContent() {
     wallStore.setOpen(true);
     wallStore.setSelectedNode(node);
   };
-  const getNewNodes = () => {
+  const getNewNodes = (showMessage = true) => {
     const nodes = reactFlowInstance.getNodes();
-    wallStore.saveNodes(nodes);
+    console.log('showMessage', showMessage);
+    wallStore.saveNodes(nodes, { showMessage: showMessage });
   };
   useEffect(() => {
     if (mount) {
@@ -70,6 +79,7 @@ export function FlowContent() {
     }
   }, [nodes, mount]);
   useTabNode();
+  useListenPaster();
   // 添加新节点的函数
   const onPaneDoubleClick = (event) => {
     // 计算节点位置
@@ -78,19 +88,18 @@ export function FlowContent() {
     const postion = reactFlowInstance.screenToFlowPosition({ x, y });
     const newNode = {
       id: randomId(), // 确保每个节点有唯一的ID
-      type: 'wall', // 节点类型
+      type: 'wallnote', // 节点类型
       position: postion, // 使用事件的客户端坐标
       data: { html: BlankNoteText },
     };
     setNodes((nds) => {
       const newNodes = nds.concat(newNode);
-      getNewNodes();
       return newNodes;
     });
-    message.success('添加节点成功');
     setTimeout(() => {
       wallStore.setSelectedNode(newNode);
       wallStore.setOpen(true);
+      getNewNodes();
     }, 200);
   };
   const hasFoucedNode = useMemo(() => {
@@ -99,6 +108,13 @@ export function FlowContent() {
   const { onCheckPanelDoubleClick } = useCheckDoubleClick({
     onPaneDoubleClick,
   });
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY });
+  };
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
   return (
     <ReactFlow
       nodes={nodes}
@@ -109,6 +125,7 @@ export function FlowContent() {
       onPaneClick={onCheckPanelDoubleClick}
       zoomOnScroll={true}
       preventScrolling={!hasFoucedNode}
+      onContextMenu={handleContextMenu}
       nodeTypes={CustomNodeType}>
       <Controls />
       <MiniMap />
@@ -119,6 +136,7 @@ export function FlowContent() {
       <Panel>
         <Drawer />
         <SaveModal />
+        {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleCloseContextMenu} />}
       </Panel>
     </ReactFlow>
   );

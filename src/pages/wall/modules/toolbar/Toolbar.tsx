@@ -1,4 +1,4 @@
-import { PanelTopOpen, PanelTopClose, Save, Download, Upload, User, Trash, Plus } from 'lucide-react';
+import { PanelTopOpen, PanelTopClose, Save, Download, Upload, User, Trash, Plus, BrickWall } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWallStore } from '../../store/wall';
@@ -25,6 +25,14 @@ export const ToolbarItem = ({
       {children}
     </div>
   );
+};
+export type MenuItem = {
+  label: string;
+  key: string;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
+  onClick: () => any;
 };
 // 空白处点击，当不包函toolbar时候，关闭toolbar
 export const useBlankClick = () => {
@@ -61,14 +69,7 @@ export const ToolbarContent = ({ open }) => {
   const store = useStore((state) => state);
   const hasLogin = !!userWallStore.user;
   const navigate = useNavigate();
-  type MenuItem = {
-    label: string;
-    key: string;
-    icon?: React.ReactNode;
-    children?: React.ReactNode;
-    className?: string;
-    onClick: () => any;
-  };
+
   const menuList: MenuItem[] = [
     {
       label: '导出',
@@ -97,7 +98,7 @@ export const ToolbarContent = ({ open }) => {
               const file = e.target.files?.[0];
               if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                   const data = e.target?.result;
                   const json = JSON.parse(data as string);
                   const keys = ['id', 'type', 'position', 'data'];
@@ -108,7 +109,10 @@ export const ToolbarContent = ({ open }) => {
                     });
                     const _nodes = [...nodes, ...newNodes];
                     store.setNodes(_nodes);
-                    wallStore.saveNodes(_nodes);
+                    // window.location.reload();
+                    wallStore.setNodes(_nodes);
+                    await wallStore.saveNodes(_nodes);
+                    message.success('导入成功');
                   } else {
                     message.error('文件格式错误');
                   }
@@ -139,7 +143,16 @@ export const ToolbarContent = ({ open }) => {
       },
     },
   ];
-
+  if (hasLogin) {
+    menuList.unshift({
+      label: '我的笔记',
+      key: 'myWall',
+      icon: <BrickWall />,
+      onClick: () => {
+        navigate('/list');
+      },
+    });
+  }
   if (!hasLogin) {
     menuList.push({
       label: '登录',
@@ -218,6 +231,7 @@ export const ToolbarContent = ({ open }) => {
         },
       });
     }
+
     menuList.push({
       label: '退出  ',
       key: 'logout',

@@ -58,7 +58,7 @@ export const useUserWallStore = create<UserWallStore>((set, get) => ({
     const res = await query.post({
       path: 'mark',
       key: 'list',
-      markType: 'wall',
+      markType: 'wallnote',
       page: 1,
       pageSize: 10,
     });

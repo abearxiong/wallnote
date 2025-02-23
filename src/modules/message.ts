@@ -5,19 +5,29 @@ export const message = {
     toast.error(message, options);
   },
   success: (message: string, options?: ToastOptions) => {
-    toast.success(message, {
+    return toast.success(message, {
       position: 'top-left',
       autoClose: 1000,
       ...options,
     });
   },
   warning: (message: string, options?: ToastOptions) => {
-    toast.warning(message, options);
+    return toast.warning(message, options);
   },
   info: (message: string, options?: ToastOptions) => {
-    toast.info(message, options);
+    return toast.info(message, options);
   },
   default: (message: string, options?: ToastOptions) => {
-    toast(message, options);
+    return toast(message, options);
+  },
+  loading: (message: string, options?: ToastOptions) => {
+    return toast(message, {
+      position: 'top-left',
+      autoClose: false,
+      ...options,
+    });
+  },
+  close: (id: number | string) => {
+    toast.dismiss(id);
   },
 };

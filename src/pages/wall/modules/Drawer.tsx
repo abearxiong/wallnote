@@ -61,11 +61,15 @@ const Drawer = () => {
       const newNodes = storeApi.getState().nodes.map((node) => (node.id === selectedNode.id ? selectedNode : node));
       storeApi.setState({ nodes: newNodes });
       if (wallStore.id) {
-        message.success('保存成功', {
+        message.success('保存到服务器成功', {
+          closeOnClick: true,
+        });
+      } else {
+        message.success('保存到本地成功', {
           closeOnClick: true,
         });
       }
-      wallStore.saveNodes(newNodes);
+      wallStore.saveNodes(newNodes, { showMessage: false });
     }
   };
   let html = selectedNode?.data?.html || '';

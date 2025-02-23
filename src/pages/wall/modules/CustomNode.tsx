@@ -34,7 +34,7 @@ const ShowContent = (props: { data: WallData; selected: boolean }) => {
   return (
     <div
       ref={showRef}
-      className='p-2 w-full h-full overflow-y-auto scrollbar tiptap bg-white'
+      className='p-2 w-full h-full overflow-y-auto scrollbar tiptap bg-white markdown-body'
       style={{
         pointerEvents: selected ? 'auto' : 'none',
       }}
@@ -55,6 +55,9 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
       };
     }),
   );
+  const save = (nodes: any[]) => {
+    wallStore.saveNodes(nodes);
+  };
   const store = useStore((state) => {
     return {
       updateWallRect: (id: string, rect: { width: number; height: number }) => {
@@ -66,7 +69,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
           return node;
         });
         state.setNodes(nodes);
-        wallStore.saveNodes(nodes);
+        save(nodes);
       },
       getNode: (id: string) => {
         return state.nodes.find((node) => node.id === id);
@@ -74,21 +77,22 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
       deleteNode: (id: string) => {
         const nodes = state.nodes.filter((node) => node.id !== id);
         state.setNodes(nodes);
-        wallStore.saveNodes(nodes);
+        console.log('save', nodes, id);
+        save(nodes);
       },
     };
   });
-  useEffect(() => {
-    if (selected) {
-      const handleDelete = (e: KeyboardEvent) => {
-        if (e.key === 'Delete') {
-          store.deleteNode(props.id);
-        }
-      };
-      window.addEventListener('keydown', handleDelete);
-      return () => window.removeEventListener('keydown', handleDelete);
-    }
-  }, [selected]);
+  // useEffect(() => {
+  //   if (selected) {
+  //     const handleDelete = (e: KeyboardEvent) => {
+  //       if (e.key === 'Delete') {
+  //         store.deleteNode(props.id);
+  //       }
+  //     };
+  //     window.addEventListener('keydown', handleDelete);
+  //     return () => window.removeEventListener('keydown', handleDelete);
+  //   }
+  // }, [selected]);
   const width = data.width || 100;
   const height = data.height || 100;
   const style: React.CSSProperties = {};
@@ -96,7 +100,12 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
   style.height = height;
   const showOpen = () => {
     const node = store.getNode(props.id);
+    console.log('node eidt', node);
     if (node) {
+      if (node.data?.noEdit) {
+        message.error('不支持编辑');
+        return;
+      }
       wallStore.setOpen(true);
       wallStore.setSelectedNode(node);
     } else {
@@ -146,5 +155,5 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
 };
 export const WallNoteNode = memo(CustomNode);
 export const CustomNodeType = {
-  wall: WallNoteNode,
+  wallnote: WallNoteNode,
 };

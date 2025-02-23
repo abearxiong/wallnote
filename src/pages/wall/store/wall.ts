@@ -24,7 +24,7 @@ interface WallState {
   // 只做传递
   nodes: NodeData[];
   setNodes: (nodes: NodeData[]) => void;
-  saveNodes: (nodes: NodeData[]) => Promise<void>;
+  saveNodes: (nodes: NodeData[], opts?: { showMessage?: boolean }) => Promise<void>;
   open: boolean;
   setOpen: (open: boolean) => void;
   selectedNode: NodeData | null;
@@ -67,10 +67,13 @@ export const useWallStore = create<WallState>((set, get) => ({
   setNodes: (nodes) => {
     set({ nodes });
   },
-  saveNodes: async (nodes: NodeData[]) => {
+  saveNodes: async (nodes: NodeData[], opts) => {
+    console.log('nodes', nodes, opts, opts?.showMessage ?? true);
     if (!get().id) {
       const covertData = getNodeData(nodes);
       setWallData({ nodes: covertData });
+      const showMessage = opts?.showMessage ?? true;
+      showMessage && message.success('保存到本地');
     } else {
       const { id } = get();
       const userWallStore = useUserWallStore.getState();
