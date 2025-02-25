@@ -1,7 +1,7 @@
 {
   "name": "wallnote",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.6",
   "type": "module",
   "user": "apps",
   "scripts": {
@@ -11,8 +11,8 @@
     "lint": "eslint .",
     "deploy": "rsync -avz --delete dist/ light:~/apps/ai/dist",
     "preview": "vite preview",
-    "prepub": "envision switchOrg apps",
-    "pub": "envision deploy ./dist -k wallnote -v 0.0.3 -y y",
+    "prepub": "pnpm build && envision switch apps",
+    "pub": "envision deploy ./dist -k wallnote -v 0.0.6 -y y",
     "ev": "npm run build && npm run deploy"
   },
   "stackblitz": {

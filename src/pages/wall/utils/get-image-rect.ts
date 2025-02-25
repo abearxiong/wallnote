@@ -29,3 +29,49 @@ export const getImageWidthHeightByBase64 = async (
     img.src = b64str;
   });
 };
+
+/**
+ * 我有一个字符串，在在宽度为width的元素当中，自动换行，需要知道最后有多少行。
+ * 不使用canvas，通过文本font-size=16px，计算有多少行
+ * @param str
+ * @param width
+ */
+export const getTextWidthHeight = async ({
+  str,
+  width,
+  fontSize = 16,
+  maxHeight = 600,
+  minHeight = 100,
+}: {
+  str: string;
+  width: number;
+  fontSize?: number;
+  maxHeight?: number;
+  minHeight?: number;
+}) => {
+  function calculateTextHeight(text: string, width: number, fontSize: number = 16): number {
+    // 创建一个隐藏的 DOM 元素来测量文本高度
+    const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.visibility = 'hidden';
+    element.style.width = `${width}px`;
+    element.style.fontSize = `${fontSize}px`;
+    element.style.lineHeight = '1.2'; // 假设行高为 1.2 倍字体大小
+    element.style.whiteSpace = 'pre-wrap'; // 保留空白并允许换行
+    element.style.wordWrap = 'break-word'; // 允许长单词换行
+    element.innerText = text;
+
+    document.body.appendChild(element);
+    const height = element.offsetHeight;
+    document.body.removeChild(element);
+
+    return height;
+  }
+  const height = calculateTextHeight(str, width, fontSize);
+  if (height > maxHeight) {
+    return { width, height: maxHeight };
+  } else if (height < minHeight) {
+    return { width, height: minHeight };
+  }
+  return { width, height };
+};

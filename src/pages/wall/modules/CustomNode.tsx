@@ -1,6 +1,6 @@
 import { useRef, memo, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { NodeResizer, useStore } from '@xyflow/react';
+import { NodeResizer, useStore, useReactFlow } from '@xyflow/react';
 import { useWallStore } from '../store/wall';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'react-toastify';
@@ -45,13 +45,14 @@ const ShowContent = (props: { data: WallData; selected: boolean }) => {
 export const CustomNode = (props: { id: string; data: WallData; selected: boolean }) => {
   const data = props.data;
   const contentRef = useRef<HTMLDivElement>(null);
-  const selected = props.selected;
+  const reactFlowInstance = useReactFlow();
+  const zoom = reactFlowInstance.getViewport().zoom;
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
-        setOpen: state.setOpen,
         setSelectedNode: state.setSelectedNode,
         saveNodes: state.saveNodes,
+        checkAndOpen: state.checkAndOpen,
       };
     }),
   );
@@ -102,16 +103,17 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
     const node = store.getNode(props.id);
     console.log('node eidt', node);
     if (node) {
-      if (node.data?.noEdit) {
-        message.error('不支持编辑');
+      const dataType: string = (node?.data?.dataType as string) || '';
+      if (dataType && dataType?.startsWith('image')) {
+        message.error('不支持编辑图片');
         return;
       }
-      wallStore.setOpen(true);
-      wallStore.setSelectedNode(node);
+      wallStore.checkAndOpen(true, node);
     } else {
       message.error('节点不存在');
     }
   };
+  const handleSize = Math.max(10, 10 / zoom);
   return (
     <>
       <div
@@ -125,7 +127,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
         style={style}>
         <ShowContent data={data} selected={props.selected} />
       </div>
-      <div className={clsx('absolute top-0 right-0', props.selected ? 'opacity-100' : 'opacity-0')}>
+      <div className={clsx('absolute top-0 right-0 cursor-pointer', props.selected ? 'opacity-100' : 'opacity-0')}>
         <button
           className='w-6 h-6  flex items-center justify-center'
           onClick={() => {
@@ -149,6 +151,14 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
           if (!heightNum || !widthNum) return;
           store.updateWallRect(props.id, { width: widthNum, height: heightNum });
         }}
+        handleStyle={
+          props.selected
+            ? {
+                width: handleSize,
+                height: handleSize,
+              }
+            : undefined
+        }
       />
     </>
   );

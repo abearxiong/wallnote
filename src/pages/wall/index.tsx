@@ -40,7 +40,15 @@ type NodeData = {
 export function FlowContent() {
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
-  const wallStore = useWallStore((state) => state);
+  const wallStore = useWallStore(
+    useShallow((state) => {
+      return {
+        nodes: state.nodes,
+        saveNodes: state.saveNodes,
+        checkAndOpen: state.checkAndOpen,
+      };
+    }),
+  );
   const store = useStore((state) => state);
   const [mount, setMount] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -65,8 +73,7 @@ export function FlowContent() {
     };
   }, [wallStore.nodes]);
   const onNodeDoubleClick = (event, node) => {
-    wallStore.setOpen(true);
-    wallStore.setSelectedNode(node);
+    wallStore.checkAndOpen(true, node);
   };
   const getNewNodes = (showMessage = true) => {
     const nodes = reactFlowInstance.getNodes();
@@ -79,7 +86,7 @@ export function FlowContent() {
     }
   }, [nodes, mount]);
   useTabNode();
-  useListenPaster();
+  // useListenPaster();
   // 添加新节点的函数
   const onPaneDoubleClick = (event) => {
     // 计算节点位置
@@ -97,8 +104,7 @@ export function FlowContent() {
       return newNodes;
     });
     setTimeout(() => {
-      wallStore.setSelectedNode(newNode);
-      wallStore.setOpen(true);
+      wallStore.checkAndOpen(true, newNode);
       getNewNodes();
     }, 200);
   };
@@ -126,6 +132,8 @@ export function FlowContent() {
       zoomOnScroll={true}
       preventScrolling={!hasFoucedNode}
       onContextMenu={handleContextMenu}
+      minZoom={0.05}
+      maxZoom={20}
       nodeTypes={CustomNodeType}>
       <Controls />
       <MiniMap />
@@ -149,6 +157,7 @@ export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
       return {
         loaded: state.loaded,
         init: state.init,
+        clearId: state.clearId,
       };
     }),
   );
@@ -168,6 +177,7 @@ export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
           variant='contained'
           onClick={() => {
             navigate('/');
+            wallStore.clearId();
           }}>
           转到首页
         </Button>

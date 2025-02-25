@@ -9,7 +9,7 @@ import { message } from '@/modules/message';
 import { useShallow } from 'zustand/react/shallow';
 import { isMac } from '../utils/is-mac';
 const Drawer = () => {
-  const { open, setOpen, selectedNode, setSelectedNode, editValue, setEditValue } = useWallStore(
+  const { open, setOpen, selectedNode, setSelectedNode, editValue, setEditValue, hasEdited, setHasEdited } = useWallStore(
     useShallow((state) => ({
       open: state.open,
       setOpen: state.setOpen,
@@ -17,18 +17,23 @@ const Drawer = () => {
       setSelectedNode: state.setSelectedNode,
       editValue: state.editValue,
       setEditValue: state.setEditValue,
+      hasEdited: state.hasEdited,
+      setHasEdited: state.setHasEdited,
     })),
   );
   const store = useStore((state) => state);
   const storeApi = useStoreApi();
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     if (open && selectedNode) {
-      setEditValue(selectedNode?.data.html);
+      setEditValue(selectedNode?.data.html, true);
     }
   }, [open, selectedNode]);
   useEffect(() => {
+    setMounted(true);
     return () => {
       setOpen(false);
+      setHasEdited(false);
       setSelectedNode(null);
     };
   }, []);
@@ -52,6 +57,15 @@ const Drawer = () => {
       window.removeEventListener('keydown', listener);
     };
   }, []);
+  useEffect(() => {
+    console.log('editValue', editValue, open, mounted);
+    if (!open && mounted) {
+      console.log('hasEdited', hasEdited);
+      if (hasEdited) {
+        onSave();
+      }
+    }
+  }, [open, hasEdited, mounted]);
   const onSave = () => {
     const wallStore = useWallStore.getState();
     const selectedNode = wallStore.selectedNode;

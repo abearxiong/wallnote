@@ -6,7 +6,7 @@ type User = {
   username: string;
   avatar: string;
 };
-type Wall = {
+export type Wall = {
   id?: string;
   title?: string;
   description?: string;

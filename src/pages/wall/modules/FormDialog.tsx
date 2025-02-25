@@ -3,9 +3,10 @@ import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, C
 import { useShallow } from 'zustand/react/shallow';
 import { getNodeData, useWallStore } from '../store/wall';
 import { useReactFlow, useStore } from '@xyflow/react';
-import { useUserWallStore } from '../store/user-wall';
+import { useUserWallStore, Wall } from '../store/user-wall';
 import { message } from '@/modules/message';
 import { useNavigate } from 'react-router-dom';
+import { WallData } from './CustomNode';
 
 function FormDialog({ open, handleClose, handleSubmit, initialData }) {
   const [data, setData] = useState(initialData || { title: '', description: '', summary: '', tags: [] });
@@ -106,7 +107,10 @@ export const SaveModal = () => {
       tags: values.tags,
       markType: 'wallnote' as 'wallnote',
       data,
-    };
+    } as Wall;
+    if (id) {
+      fromData.id = id;
+    }
     const loading = message.loading('保存中...');
     const res = await userWallStore.saveWall(fromData, { refresh: false });
     message.close(loading);

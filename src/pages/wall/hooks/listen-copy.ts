@@ -26,13 +26,12 @@ export const clipboardRead = async () => {
     switch (type) {
       case 'text/plain':
         const textPlain = await data.text();
-        // const jsonContent = parseIfJson(textPlain);
-        // if (jsonContent) {
-        //   typesDataList.push({ type: 'text/json', data: jsonContent, blob: data });
-        // } else {
-        //   typesDataList.push({ type: 'text/plain', data: textPlain, blob: data });
-        // }
-        typesDataList.push({ type: 'text/plain', data: textPlain, blob: data });
+        const jsonContent = parseIfJson(textPlain);
+        if (jsonContent && jsonContent.type === 'wallnote') {
+          typesDataList.push({ type: 'text/json', data: jsonContent, blob: data });
+        } else {
+          typesDataList.push({ type: 'text/plain', data: textPlain, blob: data });
+        }
         break;
       case 'text/html':
         const textHtml = await data.text();

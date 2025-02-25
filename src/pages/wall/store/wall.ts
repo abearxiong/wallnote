@@ -4,7 +4,10 @@ import { getWallData, setWallData } from '../utils/db';
 import { useUserWallStore } from './user-wall';
 import { redirectToLogin } from '@/modules/require-to-login';
 import { message } from '@/modules/message';
-
+import { randomId } from '../utils/random';
+import { DOCS_NODE } from '../docs';
+import { toast } from 'react-toastify';
+import { SplitButtons } from '../components/SplitToast';
 type NodeData<T = { [key: string]: any }> = {
   id: string;
   position: XYPosition;
@@ -27,10 +30,13 @@ interface WallState {
   saveNodes: (nodes: NodeData[], opts?: { showMessage?: boolean }) => Promise<void>;
   open: boolean;
   setOpen: (open: boolean) => void;
+  checkAndOpen: (open?: boolean, data?: any) => void;
   selectedNode: NodeData | null;
   setSelectedNode: (node: NodeData | null) => void;
   editValue: string;
-  setEditValue: (value: string) => void;
+  setEditValue: (value: string, init?: boolean) => void;
+  hasEdited: boolean;
+  setHasEdited: (hasEdited: boolean) => void;
   data?: any;
   setData: (data: any) => void;
   init: (id?: string | null) => Promise<void>;
@@ -48,17 +54,8 @@ interface WallState {
   clear: () => Promise<void>;
   exportWall: (nodes: NodeData[]) => Promise<void>;
   clearQueryWall: () => Promise<void>;
+  clearId: () => Promise<void>;
 }
-const initialNodes = [
-  // { id: '1', type: 'wall', position: { x: 0, y: 0 }, data: { html: '1' } },
-  {
-    id: '1',
-    type: 'wall',
-    position: { x: 0, y: 0 },
-    data: { html: 'sadfsdaf1 sadfsdaf1 sadfsdaf1 sadfsdaf1 sadfsdaf1 sadfsdaf1 sadfsdaf1 sadfsdaf1', width: 410, height: 212 },
-  },
-  // { id: '2', type: 'wall', position: { x: 0, y: 100 }, data: { html: '3332' } },
-];
 
 export const useWallStore = create<WallState>((set, get) => ({
   nodes: [],
@@ -69,10 +66,11 @@ export const useWallStore = create<WallState>((set, get) => ({
   },
   saveNodes: async (nodes: NodeData[], opts) => {
     console.log('nodes', nodes, opts, opts?.showMessage ?? true);
+    const showMessage = opts?.showMessage ?? true;
+    set({ hasEdited: false });
     if (!get().id) {
       const covertData = getNodeData(nodes);
       setWallData({ nodes: covertData });
-      const showMessage = opts?.showMessage ?? true;
       showMessage && message.success('保存到本地');
     } else {
       const { id } = get();
@@ -88,19 +86,45 @@ export const useWallStore = create<WallState>((set, get) => ({
         });
         if (res.code === 200) {
           // console.log('saveNodes res', res);
-          message.success('保存成功', {
-            closeOnClick: true,
-          });
+          showMessage &&
+            message.success('保存成功', {
+              closeOnClick: true,
+            });
         }
       }
     }
   },
   open: false,
-  setOpen: (open) => set({ open }),
+  setOpen: (open) => {
+    set({ open });
+  },
+  checkAndOpen: (open, data) => {
+    const state = get();
+    if (state.hasEdited || state.open) {
+      toast(SplitButtons, {
+        closeButton: false,
+        className: 'p-0 w-[400px] border border-purple-600/40',
+        ariaLabel: 'Email received',
+        onClose: (reason) => {
+          if (reason === 'success') {
+            set({ open: true, selectedNode: data, hasEdited: false });
+          }
+        },
+      });
+      return;
+    } else set({ open, selectedNode: data });
+  },
   selectedNode: null,
   setSelectedNode: (node) => set({ selectedNode: node }),
   editValue: '',
-  setEditValue: (value) => set({ editValue: value }),
+  setEditValue: (value, init = false) => {
+    set({ editValue: value });
+    if (!init) {
+      set({ hasEdited: true });
+    }
+  },
+  hasEdited: false,
+  setHasEdited: (hasEdited) => set({ hasEdited }),
   data: null,
   setData: (data) => set({ data }),
   id: null,
@@ -124,7 +148,17 @@ export const useWallStore = create<WallState>((set, get) => ({
       redirectToLogin();
     } else {
       const data = await getWallData();
-      set({ nodes: data?.nodes || [], loaded: true });
+      const nodes = data?.nodes || [];
+      if (nodes.length === 0) {
+        set({
+          nodes: [DOCS_NODE], //
+          loaded: true,
+          id: null,
+          data: null,
+        });
+      } else {
+        set({ nodes, loaded: true, id: null, data: null });
+      }
     }
   },
   toolbarOpen: false,
@@ -135,7 +169,7 @@ export const useWallStore = create<WallState>((set, get) => ({
   setFormDialogData: (data) => set({ formDialogData: data }),
   clear: async () => {
     if (get().id) {
-      set({ nodes: initialNodes, id: null, selectedNode: null, editValue: '', data: null });
+      set({ nodes: [], selectedNode: null, editValue: '', data: null });
       await useUserWallStore.getState().saveWall({
         id: get().id!,
         data: {
@@ -143,9 +177,12 @@ export const useWallStore = create<WallState>((set, get) => ({
         },
       });
     } else {
-      set({ nodes: initialNodes, id: null, selectedNode: null, editValue: '', data: null });
+      set({ nodes: [], id: null, selectedNode: null, editValue: '', data: null });
       await setWallData({ nodes: [] });
     }
+  },
+  clearId: async () => {
+    set({ id: null, data: null });
   },
   exportWall: async (nodes: NodeData[]) => {
     const covertData = getNodeData(nodes);
@@ -160,6 +197,6 @@ export const useWallStore = create<WallState>((set, get) => ({
     a.click();
   },
   clearQueryWall: async () => {
-    set({ nodes: initialNodes, id: null, selectedNode: null, editValue: '', data: null, toolbarOpen: false, loaded: false });
+    set({ nodes: [], id: null, selectedNode: null, editValue: '', data: null, toolbarOpen: false, loaded: false });
   },
 }));
