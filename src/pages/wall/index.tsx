@@ -25,13 +25,14 @@ import { message } from '@/modules/message';
 import { useShallow } from 'zustand/react/shallow';
 import { BlankNoteText } from './constants';
 import { Toolbar } from './modules/toolbar/Toolbar';
-import { useUserWallStore } from './store/user-wall';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SaveModal } from './modules/FormDialog';
 import { useTabNode } from './hooks/tab-node';
 import { Button } from '@mui/material';
 import { useListenPaster } from './hooks/listen-copy';
 import { ContextMenu } from './modules/ContextMenu';
+import { useSelect } from './hooks/use-select';
+import clsx from 'clsx';
 type NodeData = {
   id: string;
   position: XYPosition;
@@ -40,31 +41,51 @@ type NodeData = {
 export function FlowContent() {
   const reactFlowInstance = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
+
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
         nodes: state.nodes,
         saveNodes: state.saveNodes,
         checkAndOpen: state.checkAndOpen,
+        mouseSelect: state.mouseSelect, // 鼠标模式,不能拖动
+        setMouseSelect: state.setMouseSelect,
       };
     }),
   );
+  const { isSelecting, selectionBox, setIsSelecting, canvasRef } = useSelect({
+    onSelect: (nodes) => {
+      setSelectedNodes(nodes);
+    },
+    listenMouseDown: !wallStore.mouseSelect,
+  });
   const store = useStore((state) => state);
   const [mount, setMount] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   const _onNodesChange = useCallback((changes: NodeChange[]) => {
     const [change] = changes;
-
     if (change.type === 'remove') {
       wallStore.saveNodes(reactFlowInstance.getNodes().filter((item) => item.id !== change.id));
     }
     if (change.type === 'position' && change.dragging === false) {
-      // console.log('position changes', change);
       getNewNodes(false);
     }
     onNodesChange(changes);
   }, []);
+  const setSelectedNodes = (nodes: any[]) => {
+    const _nodes = reactFlowInstance.getNodes();
+    const selectedNodes = nodes.map((node) => node.id);
+    const newNodes = _nodes.map((node) => {
+      if (selectedNodes.includes(node.id)) {
+        return { ...node, selected: true };
+      }
+      delete node.selected;
+      return node;
+    });
+
+    reactFlowInstance.setNodes(newNodes);
+  };
   useEffect(() => {
     setNodes(wallStore.nodes);
     setMount(true);
@@ -77,7 +98,6 @@ export function FlowContent() {
   };
   const getNewNodes = (showMessage = true) => {
     const nodes = reactFlowInstance.getNodes();
-    console.log('showMessage', showMessage);
     wallStore.saveNodes(nodes, { showMessage: showMessage });
   };
   useEffect(() => {
@@ -121,32 +141,72 @@ export function FlowContent() {
   const handleCloseContextMenu = () => {
     setContextMenu(null);
   };
+
   return (
-    <ReactFlow
-      nodes={nodes}
-      // debug={DEV_SERVER}
-      fitView
-      onNodesChange={_onNodesChange}
-      onNodeDoubleClick={onNodeDoubleClick}
-      onPaneClick={onCheckPanelDoubleClick}
-      zoomOnScroll={true}
-      preventScrolling={!hasFoucedNode}
-      onContextMenu={handleContextMenu}
-      minZoom={0.05}
-      maxZoom={20}
-      nodeTypes={CustomNodeType}>
-      <Controls />
-      <MiniMap />
-      <Background gap={[14, 14]} size={2} color='#E4E5E7' />
-      <Panel position='top-left'>
-        <Toolbar />
-      </Panel>
-      <Panel>
-        <Drawer />
-        <SaveModal />
-        {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleCloseContextMenu} />}
-      </Panel>
-    </ReactFlow>
+    <>
+      <div style={{ width: '100%', height: '100%', position: 'fixed', top: 0, left: 0, zIndex: 100 }} ref={canvasRef!}>
+        <ReactFlow
+          nodes={nodes}
+          // debug={DEV_SERVER}
+          fitView
+          onNodesChange={_onNodesChange}
+          onNodeDoubleClick={onNodeDoubleClick}
+          onPaneClick={onCheckPanelDoubleClick}
+          zoomOnScroll={true}
+          preventScrolling={!hasFoucedNode}
+          onContextMenu={handleContextMenu}
+          minZoom={0.05}
+          maxZoom={20}
+          className='cursor-grab'
+          style={{ pointerEvents: wallStore.mouseSelect ? 'auto' : 'none' }}
+          nodeTypes={CustomNodeType}>
+          <Controls className='bottom-10!'>
+            <button
+              type='button'
+              className={clsx('react-flow__controls-button react-flow__controls-fitview', {
+                'text-gray-500!': !wallStore.mouseSelect,
+              })}
+              title='fit view'
+              aria-label='fit view'
+              onClick={() => {
+                wallStore.setMouseSelect(!wallStore.mouseSelect);
+                if (wallStore.mouseSelect) {
+                  message.info('框选模式');
+                } else {
+                  message.info('拖动模式');
+                }
+              }}>
+              <svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='currentColor' className='remixicon w-4 h-4'>
+                <path d='M15.3873 13.4975L17.9403 20.5117L13.2418 22.2218L10.6889 15.2076L6.79004 17.6529L8.4086 1.63318L19.9457 12.8646L15.3873 13.4975ZM15.3768 19.3163L12.6618 11.8568L15.6212 11.4459L9.98201 5.9561L9.19088 13.7863L11.7221 12.1988L14.4371 19.6583L15.3768 19.3163Z'></path>
+              </svg>
+            </button>
+          </Controls>
+          <MiniMap />
+          <Background gap={[14, 14]} size={2} color='#E4E5E7' />
+          <Panel position='top-left'>
+            <Toolbar />
+          </Panel>
+          <Panel>
+            <Drawer />
+            <SaveModal />
+            {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleCloseContextMenu} />}
+          </Panel>
+        </ReactFlow>{' '}
+        {isSelecting && selectionBox && (
+          <div
+            style={{
+              position: 'absolute',
+              border: '1px dashed #000',
+              backgroundColor: 'rgba(0, 0, 255, 0.1)',
+              left: selectionBox.startX,
+              top: selectionBox.startY,
+              width: selectionBox.width,
+              height: selectionBox.height,
+            }}
+          />
+        )}
+      </div>
+    </>
   );
 }
 export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {

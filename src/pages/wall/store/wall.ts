@@ -55,6 +55,8 @@ interface WallState {
   exportWall: (nodes: NodeData[]) => Promise<void>;
   clearQueryWall: () => Promise<void>;
   clearId: () => Promise<void>;
+  mouseSelect: boolean;
+  setMouseSelect: (mouseSelect: boolean) => void;
 }
 
 export const useWallStore = create<WallState>((set, get) => ({
@@ -65,7 +67,6 @@ export const useWallStore = create<WallState>((set, get) => ({
     set({ nodes });
   },
   saveNodes: async (nodes: NodeData[], opts) => {
-    console.log('nodes', nodes, opts, opts?.showMessage ?? true);
     const showMessage = opts?.showMessage ?? true;
     set({ hasEdited: false });
     if (!get().id) {
@@ -75,7 +76,6 @@ export const useWallStore = create<WallState>((set, get) => ({
     } else {
       const { id } = get();
       const userWallStore = useUserWallStore.getState();
-      console.log('saveNodes id', id);
       if (id) {
         const covertData = getNodeData(nodes);
         const res = await userWallStore.saveWall({
@@ -199,4 +199,6 @@ export const useWallStore = create<WallState>((set, get) => ({
   clearQueryWall: async () => {
     set({ nodes: [], id: null, selectedNode: null, editValue: '', data: null, toolbarOpen: false, loaded: false });
   },
+  mouseSelect: true,
+  setMouseSelect: (mouseSelect) => set({ mouseSelect }),
 }));

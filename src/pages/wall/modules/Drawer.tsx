@@ -58,9 +58,7 @@ const Drawer = () => {
     };
   }, []);
   useEffect(() => {
-    console.log('editValue', editValue, open, mounted);
     if (!open && mounted) {
-      console.log('hasEdited', hasEdited);
       if (hasEdited) {
         onSave();
       }
