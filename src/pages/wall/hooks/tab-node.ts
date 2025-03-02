@@ -1,12 +1,14 @@
 import { useReactFlow } from '@xyflow/react';
 import { useEffect } from 'react';
-
+import { useWallStore } from '../store/wall';
+import { useShallow } from 'zustand/react/shallow';
 export const useTabNode = () => {
   const reactFlowInstance = useReactFlow();
+  const open = useWallStore(useShallow((state) => state.open));
   useEffect(() => {
+    if (open) return;
     const listener = (event: any) => {
       if (event.key === 'Tab') {
-        console.log('tab');
         const nodes = reactFlowInstance.getNodes();
         const selectedNode = nodes.find((node) => node.selected);
         if (!selectedNode) return;
@@ -58,5 +60,5 @@ export const useTabNode = () => {
     return () => {
       window.removeEventListener('keydown', listener);
     };
-  }, [reactFlowInstance]);
+  }, [reactFlowInstance, open]);
 };

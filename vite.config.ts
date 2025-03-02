@@ -26,7 +26,8 @@ if(isKevisual) {
       changeOrigin: true,
     },
     '/api/router': {
-      target: 'ws://localhost:3000',
+      // target: 'ws://localhost:3000',
+      target: 'https://kevisual.xiongxiao.me',
       changeOrigin: true,
       ws: true,
       rewriteWsOrigin: true,
