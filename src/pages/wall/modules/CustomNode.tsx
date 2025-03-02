@@ -107,6 +107,9 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
       if (dataType && dataType?.startsWith('image')) {
         message.error('不支持编辑图片');
         return;
+      } else if (dataType) {
+        message.error('不支持编辑');
+        return;
       }
       wallStore.checkAndOpen(true, node);
     } else {

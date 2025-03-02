@@ -151,7 +151,7 @@ export const useWallStore = create<WallState>((set, get) => ({
       const nodes = data?.nodes || [];
       if (nodes.length === 0) {
         set({
-          nodes: [DOCS_NODE], //
+          nodes: [...DOCS_NODE], //
           loaded: true,
           id: null,
           data: null,
