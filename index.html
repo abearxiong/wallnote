@@ -1,13 +1,23 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wall Note</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace Wall Note</title>
+  <script src="/system/lib/app.js"></script>
+  <link rel="stylesheet" href="/aidist/wallnote.css">
+  <script>
+    console.log(Object.keys(window.context));
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <!-- <script type="module" src="/aidist/router.es.js"></script> -->
+  <!-- <script type="module" src="/template/index.ts"></script> -->
+</body>
+
 </html>

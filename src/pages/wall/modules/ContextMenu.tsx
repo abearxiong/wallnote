@@ -195,7 +195,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, onClose }) => {
         backgroundColor: 'white',
         border: '1px solid #ccc',
         width: 200,
-        zIndex: 1000,
+        zIndex: 100,
       }}
       onMouseLeave={onClose}>
       {menuList.map((item) => (

@@ -4,6 +4,8 @@ import Highlight from '@tiptap/extension-highlight';
 import Typography from '@tiptap/extension-typography';
 import { Markdown } from 'tiptap-markdown';
 
+import Placeholder from '@tiptap/extension-placeholder';
+import { Commands, getSuggestionItems, createSuggestionConfig } from './extensions/suggestions';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
 import 'highlight.js/styles/github.css';
@@ -13,6 +15,8 @@ import ts from 'highlight.js/lib/languages/typescript';
 import html from 'highlight.js/lib/languages/xml';
 import css from 'highlight.js/lib/languages/css';
 import markdown from 'highlight.js/lib/languages/markdown';
+import './editor.css';
+
 const lowlight = createLowlight(all);
 
 // you can also register individual languages
@@ -31,11 +35,16 @@ export class TextEditor {
       this.destroy();
     }
     const html = opts?.html || '';
+    const items = getSuggestionItems();
+    const suggestionConfig = createSuggestionConfig(items);
     this.editor = new Editor({
       element: el, // 指定编辑器容器
       extensions: [
         StarterKit, // 使用 StarterKit 包含基础功能
         Highlight,
+        Placeholder.configure({
+          placeholder: 'Type ! to see commands (e.g., !today, !list, !good)...',
+        }),
         Typography,
         Markdown,
         CodeBlockLowlight.extend({
@@ -67,6 +76,9 @@ export class TextEditor {
           },
         }).configure({
           lowlight,
+        }),
+        Commands.configure({
+          suggestion: suggestionConfig,
         }),
       ],
       content: html, // 初始化内容

@@ -38,6 +38,7 @@
   },
   "include": [
     "src",
-    "typings.d.ts"
+    "typings.d.ts",
+    "template"
   ]
 }

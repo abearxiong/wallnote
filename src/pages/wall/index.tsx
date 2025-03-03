@@ -25,7 +25,7 @@ import { message } from '@/modules/message';
 import { useShallow } from 'zustand/react/shallow';
 import { BlankNoteText } from './constants';
 import { Toolbar } from './modules/toolbar/Toolbar';
-import { useNavigate, useParams } from 'react-router-dom';
+// import { useNavigate, useParams } from 'react-router-dom';
 import { SaveModal } from './modules/FormDialog';
 import { useTabNode } from './hooks/tab-node';
 import { Button } from '@mui/material';
@@ -210,8 +210,9 @@ export function FlowContent() {
   );
 }
 export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  // const { id } = useParams();
+  const id = '';
+  // const navigate = useNavigate();
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
@@ -236,7 +237,7 @@ export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
         <Button
           variant='contained'
           onClick={() => {
-            navigate('/');
+            // navigate('/');
             wallStore.clearId();
           }}>
           转到首页

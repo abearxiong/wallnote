@@ -5,7 +5,7 @@ import { getNodeData, useWallStore } from '../store/wall';
 import { useReactFlow, useStore } from '@xyflow/react';
 import { useUserWallStore, Wall } from '../store/user-wall';
 import { message } from '@/modules/message';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { WallData } from './CustomNode';
 
 function FormDialog({ open, handleClose, handleSubmit, initialData }) {
@@ -93,7 +93,7 @@ export const SaveModal = () => {
   const userWallStore = useUserWallStore(useShallow((state) => state));
   const { showFormDialog, setShowFormDialog, formDialogData, setFormDialogData } = wallStore;
   const reactFlowInstance = useReactFlow();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { id } = wallStore;
   const onSubmit = async (values) => {
     const nodes = reactFlowInstance.getNodes();
@@ -122,7 +122,7 @@ export const SaveModal = () => {
         message.info('redirect to edit page');
         wallStore.clear();
         setTimeout(() => {
-          navigate(`/edit/${data.id}`);
+          // navigate(`/edit/${data.id}`);
         }, 2000);
       } else {
         // 编辑

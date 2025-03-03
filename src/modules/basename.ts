@@ -1,1 +1,1 @@
-export const basename = DEV_SERVER ? '/' : BASE_NAME;
+export const basename = DEV_SERVER ? '' : BASE_NAME;

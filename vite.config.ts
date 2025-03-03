@@ -9,9 +9,9 @@ const version = pkgs.version || '0.0.1';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const basename = isDev ? '/' : '/apps/wallnote';
+const basename = isDev ? '/' : '/workspace/wallnote';
 const plugins = []
-const isWeb = false;
+const isWeb = true;
 const isKevisual = true;
 
 if(isWeb) {
@@ -27,13 +27,18 @@ if(isKevisual) {
     },
     '/api/router': {
       // target: 'ws://localhost:3000',
-      target: 'https://kevisual.xiongxiao.me',
+      // target: 'https://kevisual.xiongxiao.me',
+      target: 'wss://kevisual.xiongxiao.me',
       changeOrigin: true,
       ws: true,
       rewriteWsOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, '/api'),
     },
-    '/root/center': {
+    '/system/lib': {
+      target: 'https://kevisual.xiongxiao.me/',
+      changeOrigin: true,
+    },
+    '/user/login': {
       target: 'https://kevisual.xiongxiao.me',
       changeOrigin: true,
     },
@@ -55,10 +60,21 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+    // rollupOptions: {
+    //   input: {
+    //     index: './index.html',
+    //   },
+    // },
+  },
+  optimizeDeps: {
+    exclude: ['aidist'],
   },
   server: {
     port: 6004,
     host: '0.0.0.0',
+    watch: {
+      ignored: ['aidist'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3000',

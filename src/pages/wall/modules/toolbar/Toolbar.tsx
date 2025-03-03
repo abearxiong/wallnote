@@ -7,7 +7,6 @@ import { useUserWallStore } from '../../store/user-wall';
 import { redirectToLogin } from '@/modules/require-to-login';
 import { useStore } from '@xyflow/react';
 import { message } from '@/modules/message';
-import { useNavigate } from 'react-router-dom';
 import { ClickAwayListener } from '@mui/material';
 export const ToolbarItem = ({
   children,
@@ -68,7 +67,6 @@ export const ToolbarContent = ({ open }) => {
   const userWallStore = useUserWallStore(useShallow((state) => state));
   const store = useStore((state) => state);
   const hasLogin = !!userWallStore.user;
-  const navigate = useNavigate();
 
   const menuList: MenuItem[] = [
     {
@@ -149,7 +147,7 @@ export const ToolbarContent = ({ open }) => {
       key: 'myWall',
       icon: <BrickWall />,
       onClick: () => {
-        navigate('/list');
+        //
       },
     });
   }
@@ -170,7 +168,7 @@ export const ToolbarContent = ({ open }) => {
         onClick: async () => {
           const res = await userWallStore.deleteWall(wallStore.id!);
           if (res.code === 200) {
-            navigate('/');
+            // navigate('/');
           }
         },
       });
@@ -212,7 +210,7 @@ export const ToolbarContent = ({ open }) => {
         key: 'add',
         icon: <Plus />,
         onClick: () => {
-          navigate(`/`);
+          // navigate(`/`);
           wallStore.clearQueryWall();
         },
       });
@@ -226,7 +224,7 @@ export const ToolbarContent = ({ open }) => {
           if (res.code === 200) {
             message.success('删除成功，返回首页');
             wallStore.clearQueryWall();
-            navigate('/');
+            // navigate('/');
           }
         },
       });
