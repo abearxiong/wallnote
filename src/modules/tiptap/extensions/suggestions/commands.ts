@@ -18,7 +18,6 @@ export const Commands = Extension.create({
       suggestion: {
         char: '!',
         command: ({ editor, range, props }: any) => {
-          console.log('sdfsd')
           editor
             .chain()
             .focus()

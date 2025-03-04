@@ -1,30 +1,32 @@
 import React, { useState, useCallback, useRef, useEffect, RefObject } from 'react';
-import { Maximize2, Minimize2, Minimize, Expand, X, SquareMinus, Maximize, ChevronDown } from 'lucide-react';
+import { Maximize2, Minimize2, Minimize, Expand, X, SquareMinus, Maximize, ChevronDown, CommandIcon } from 'lucide-react';
 import { WindowData, WindowPosition } from '../types';
 import classNames from 'clsx';
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
 import { getIconForWindowType } from './WindowIcons';
 import { useImperativeHandle } from 'react';
+import { emitter } from '../modules';
 interface WindowManagerProps {
   windows: WindowData[];
   showTaskbar?: boolean;
   onSave?: (windows: WindowData[]) => void;
+  onCommand?: () => void;
 }
 
 // Minimum window dimensions
 const MIN_WINDOW_WIDTH = 300;
 const MIN_WINDOW_HEIGHT = 200;
 
-const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar = true, onSave }: WindowManagerProps, ref) => {
+const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar = true, onSave, onCommand }: WindowManagerProps, ref) => {
   const [windows, setWindows] = useState<WindowData[]>(initialWindows);
-  const [minimizedWindows, setMinimizedWindows] = useState<string[]>([]);
   const [fullscreenWindow, setFullscreenWindow] = useState<string | null>(null);
   const [windowPositions, setWindowPositions] = useState<Record<string, WindowPosition>>({});
   const [activeWindow, setActiveWindow] = useState<string | null>(null);
   const [maxZIndex, setMaxZIndex] = useState(100);
   const containerRef = useRef<HTMLDivElement>(null);
   const [mount, setMount] = useState(false);
+  const [update, setUpdate] = useState(0);
   // Create stable refs for each window
   const windowRefs = useRef<Record<string, React.RefObject<HTMLDivElement | null>>>({});
   const draggableRefs = useRef<Record<string, React.RefObject<HTMLDivElement | null>>>({});
@@ -35,6 +37,11 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
     },
     getWindows: () => {
       return windows;
+    },
+    setWindows: (windows: WindowData[]) => {
+      console.log('setWindows in manager', windows);
+      setWindows(windows);
+      setUpdate((prev) => prev + 1);
     },
   }));
   useEffect(() => {
@@ -71,7 +78,7 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
     setWindowPositions(positions);
     setMaxZIndex(1000 + windows.length);
     setMount(true);
-  }, [windows.length]);
+  }, [windows.length, update]);
   useEffect(() => {
     if (mount) {
       const newWindows = windows
@@ -106,12 +113,20 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
   const handleRemoveWindow = useCallback(
     (windowId: string) => {
       const window = windows.find((w) => w.id === windowId);
-      if (window?.onHidden) {
-        window.onHidden();
+      const command = window?.commandList?.find((c) => c.key === 'close');
+      if (command) {
+        emitter.emit('window-command', { windowData: window, command });
         return;
       }
       setWindows((prev) => prev.filter((w) => w.id !== windowId));
-      setMinimizedWindows((prev) => prev.filter((id) => id !== windowId));
+      setWindows((prev) =>
+        prev.map((w) => {
+          if (w.id === windowId) {
+            return { ...w, isMinimized: false };
+          }
+          return w;
+        }),
+      );
       if (fullscreenWindow === windowId) {
         setFullscreenWindow(null);
       }
@@ -122,36 +137,44 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
   // Handle window minimize
   const handleMinimizeWindow = useCallback(
     (windowId: string) => {
-      if (minimizedWindows.includes(windowId)) {
-        setMinimizedWindows((prev) => prev.filter((id) => id !== windowId));
-        // Bring window to front when unminimizing
-        bringToFront(windowId);
-      } else {
-        setMinimizedWindows((prev) => [...prev, windowId]);
-      }
+      let needBringToFront = false;
+      setWindows((prev) =>
+        prev.map((w) => {
+          if (w.id === windowId) {
+            needBringToFront = !w.isMinimized;
+            return { ...w, isMinimized: !w.isMinimized };
+          }
+          return w;
+        }),
+      );
 
       if (fullscreenWindow === windowId) {
         setFullscreenWindow(null);
       }
+
+      if (needBringToFront) {
+        bringToFront(windowId);
+      }
     },
-    [minimizedWindows, fullscreenWindow],
+    [, fullscreenWindow],
   );
 
   // Handle window fullscreen
-  const handleFullscreenWindow = useCallback(
-    (windowId: string) => {
-      setFullscreenWindow((prev) => (prev === windowId ? null : windowId));
+  const handleFullscreenWindow = useCallback((windowId: string) => {
+    setFullscreenWindow((prev) => (prev === windowId ? null : windowId));
 
-      // Ensure window is not minimized when going fullscreen
-      if (minimizedWindows.includes(windowId)) {
-        setMinimizedWindows((prev) => prev.filter((id) => id !== windowId));
-      }
-
-      // Bring to front when going fullscreen
-      bringToFront(windowId);
-    },
-    [minimizedWindows],
-  );
+    // Ensure window is not minimized when going fullscreen
+    setWindows((prev) =>
+      prev.map((w) => {
+        if (w.id === windowId) {
+          return { ...w, isMinimized: false };
+        }
+        return w;
+      }),
+    );
+    // Bring to front when going fullscreen
+    bringToFront(windowId);
+  }, []);
 
   // Bring window to front
   const bringToFront = useCallback(
@@ -228,19 +251,19 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
   // Render the taskbar with minimized windows
   const renderTaskbar = () => {
     const showWindowsList = windows.filter((window) => window.show && window.showTaskbar);
-    if (showWindowsList.length === 0) return null;
+    // if (showWindowsList.length === 0) return null;
     // useEffect(() => {
     //   const handleResize = () => {
-    //     const icons = document.querySelectorAll('.more-icon');
-    //     icons.forEach((iconEl) => {
-    //       const icon = iconEl as HTMLElement;
-    //       const button = icon.closest('button');
-    //       if (button && button.offsetWidth <= 150) {
-    //         icon.style.display = 'none';
-    //       } else {
-    //         icon.style.display = 'block';
-    //       }
-    //     });
+    //     // const icons = document.querySelectorAll('.more-icon');
+    //     // icons.forEach((iconEl) => {
+    //     //   const icon = iconEl as HTMLElement;
+    //     //   const button = icon.closest('button');
+    //     //   if (button && button.offsetWidth <= 150) {
+    //     //     icon.style.display = 'none';
+    //     //   } else {
+    //     //     icon.style.display = 'block';
+    //     //   }
+    //     // });
     //   };
 
     //   window.addEventListener('resize', handleResize);
@@ -251,9 +274,16 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
     //   };
     // }, []);
     return (
-      <div className=' pointer-events-auto fixed w-full overflow-x-auto bottom-0 left-0 right-0 bg-gray-200 text-white p-2 flex space-x-2 z-[9000]'>
+      <div className=' pointer-events-auto  fixed w-full overflow-x-auto bottom-0 left-0 right-0 bg-gray-200 text-white p-2 flex space-x-2 z-[9000] h-[40px]'>
+        <div
+          className='flex items-center  space-x-2 cursor-pointer bg-blue-600 rounded-md p-1'
+          onClick={() => {
+            onCommand?.();
+          }}>
+          <CommandIcon size={16} />
+        </div>
         {showWindowsList.map((window) => {
-          const isMinimized = minimizedWindows.includes(window.id);
+          const isMinimized = window.isMinimized;
           return (
             <button
               key={window.id}
@@ -261,10 +291,11 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
                 'px-3 py-1 rounded text-sm max-w-[200px] truncate flex items-center justify-between',
                 isMinimized ? 'bg-gray-600 hover:bg-gray-500' : 'bg-blue-600 hover:bg-blue-500',
                 activeWindow === window.id && 'shadow-lg',
+                'bar-button',
                 'cursor-pointer',
               )}
               onClick={() => handleMinimizeWindow(window.id)}>
-              <span className='truncate min-w-[16px]'>{window.title}</span>
+              <span className='truncate min-w-[8px]'>{window.title}</span>
               <div className='flex items-center space-x-1 ml-2'>
                 {/* {isMinimized ? <Maximize className='cursor-pointer more-icon' size={16} /> : <SquareMinus className='cursor-pointer more-icon' size={16} />} */}
                 <ChevronDown className='cursor-pointer' size={16} />
@@ -288,13 +319,12 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
 
   // Render a fixed position window
   const renderFixedWindow = (windowData: WindowData) => {
-    const isMinimized = minimizedWindows.includes(windowData.id);
+    const isMinimized = windowData.isMinimized;
     const isFullscreen = fullscreenWindow === windowData.id;
     const position = windowPositions[windowData.id];
     const Icon = getIconForWindowType(windowData.type || 'welcome');
     const showRounded = windowData.showRounded ?? true;
     if (!position) return null;
-    if (isMinimized) return null;
 
     // Convert width and height to numbers for Resizable component
     const width = isFullscreen ? window.innerWidth : position.width;
@@ -310,21 +340,25 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
 
     const windowRef = windowRefs.current[windowData.id];
     const draggableRef = draggableRefs.current[windowData.id];
-
+    const zIndex = isFullscreen ? 9999 : windowData.id == '__ai__' ? 3000 : position.zIndex;
     return (
       <div
         key={windowData.id}
-        className={classNames('absolute pointer-events-auto', windowData.show && 'block', !windowData.show && 'hidden')}
+        className={classNames(
+          'absolute pointer-events-auto', //
+          windowData.show && !isMinimized && 'block',
+          (!windowData.show || isMinimized) && 'hidden',
+        )}
         style={{
           left: isFullscreen ? 0 : position.x,
           top: isFullscreen ? 0 : position.y,
           width: width,
           height: height,
-          zIndex: isFullscreen ? 9999 : position.zIndex,
+          zIndex: zIndex,
         }}
         ref={windowRef}>
         <div
-          className={classNames('window-container', isFullscreen && 'fullscreen')}
+          className={classNames('window-container', isFullscreen && 'fullscreen', showTaskbar && 'hidden-taskbar', windowData.show && !isMinimized && 'block')}
           style={{
             width: '100%',
             height: '100%',
@@ -383,7 +417,7 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
                     </div>
                     <div className='window-controls'>{renderWindowControls(windowData.id)}</div>
                   </div>
-                  <div className='window-content h-[calc(100%-32px)] overflow-auto p-4'>
+                  <div className='window-content h-[calc(100%-32px)] overflow-auto'>
                     <div className='h-full flex flex-col'>
                       <WindowContent window={windowData} />
                     </div>
@@ -396,7 +430,6 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
       </div>
     );
   };
-
   return (
     <div className='h-screen w-screen overflow-hidden' ref={containerRef}>
       {windows.map((window) => renderFixedWindow(window))}
@@ -409,10 +442,10 @@ export const WindowContent = React.memo((props: { window: WindowData }) => {
   const { window } = props;
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (ref.current) {
-      // 获取属性，判断是否加载对应的应用
-    }
-    console.log('window editor render', window);
+    emitter.emit('window-load', { windowData: window, el: ref.current });
+    return () => {
+      emitter.emit('window-unload', { windowData: window, el: ref.current });
+    };
   }, []);
   return <div data-id={window.id} className='flex-1 overflow-auto editor-window' ref={ref}></div>;
 });

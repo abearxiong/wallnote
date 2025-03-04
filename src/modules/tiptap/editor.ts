@@ -5,7 +5,7 @@ import Typography from '@tiptap/extension-typography';
 import { Markdown } from 'tiptap-markdown';
 
 import Placeholder from '@tiptap/extension-placeholder';
-import { Commands, getSuggestionItems, createSuggestionConfig } from './extensions/suggestions';
+import { Commands, getSuggestionItems, createSuggestionConfig, CommandItem } from './extensions/suggestions';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { all, createLowlight } from 'lowlight';
 import 'highlight.js/styles/github.css';
@@ -28,22 +28,28 @@ lowlight.register('markdown', markdown);
 
 export class TextEditor {
   private editor?: Editor;
+  private opts?: { markdown?: string; html?: string; items?: CommandItem[]; onUpdateHtml?: (html: string) => void };
+  private element?: HTMLElement;
+  private isInitialSetup: boolean = true;
 
   constructor() {}
-  createEditor(el: HTMLElement, opts?: { markdown?: string; html?: string }) {
+  createEditor(el: HTMLElement, opts?: { markdown?: string; html?: string; items?: CommandItem[]; onUpdateHtml?: (html: string) => void }) {
     if (this.editor) {
       this.destroy();
     }
+    this.opts = opts;
+    this.element = el;
     const html = opts?.html || '';
-    const items = getSuggestionItems();
+    const items = opts?.items || getSuggestionItems();
     const suggestionConfig = createSuggestionConfig(items);
+    this.isInitialSetup = true;
     this.editor = new Editor({
       element: el, // 指定编辑器容器
       extensions: [
         StarterKit, // 使用 StarterKit 包含基础功能
         Highlight,
         Placeholder.configure({
-          placeholder: 'Type ! to see commands (e.g., !today, !list, !good)...',
+          placeholder: 'Type ! to see commands (e.g., !today, !list !test )...',
         }),
         Typography,
         Markdown,
@@ -81,23 +87,43 @@ export class TextEditor {
           suggestion: suggestionConfig,
         }),
       ],
-      content: html, // 初始化内容
+      content: html, // 初始化内容,
+      onUpdate: () => {
+        if (this.isInitialSetup) {
+          this.isInitialSetup = false;
+          return;
+        }
+        if (this.opts?.onUpdateHtml) {
+          this.opts.onUpdateHtml(this.editor?.getHTML() || '');
+        }
+      },
     });
   }
-  setContent(html: string) {
-    this.editor?.commands.setContent(html);
+  updateSugestionConfig(items: CommandItem[]) {
+    if (!this.element) return;
+    const element = this.element;
+    if (this.editor) {
+      const content = this.editor.getHTML(); // Save current content
+      const opts = { ...this.opts, html: content, items };
+      this.createEditor(element, opts); // Recreate the editor with the new config
+    }
+  }
+  setContent(html: string, emitUpdate?: boolean) {
+    this.editor?.commands.setContent(html, emitUpdate);
+  }
+  /**
+   * before set options ,you should has element and editor
+   * @param opts
+   */
+  setOptions(opts: { markdown?: string; html?: string; items?: CommandItem[]; onUpdateHtml?: (html: string) => void }) {
+    this.opts = { ...this.opts, ...opts };
+    this.createEditor(this.element!, this.opts!);
   }
   getHtml() {
     return this.editor?.getHTML();
   }
   getContent() {
     return this.editor?.getText();
-  }
-  onContentChange(callback: (html: string) => void) {
-    this.editor?.off('update'); // 移除之前的监听
-    this.editor?.on('update', () => {
-      callback(this.editor?.getHTML() || '');
-    });
   }
   foucus() {
     this.editor?.view?.focus?.();

@@ -5,6 +5,7 @@ import { useWallStore } from '../store/wall';
 import { useShallow } from 'zustand/react/shallow';
 import { toast } from 'react-toastify';
 import { message } from '@/modules/message';
+import { app } from '../app';
 import hljs from 'highlight.js';
 import { Edit } from 'lucide-react';
 export type WallData<T = Record<string, any>> = {
@@ -50,6 +51,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
+        id: state.id,
         setSelectedNode: state.setSelectedNode,
         saveNodes: state.saveNodes,
         checkAndOpen: state.checkAndOpen,
@@ -83,17 +85,6 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
       },
     };
   });
-  // useEffect(() => {
-  //   if (selected) {
-  //     const handleDelete = (e: KeyboardEvent) => {
-  //       if (e.key === 'Delete') {
-  //         store.deleteNode(props.id);
-  //       }
-  //     };
-  //     window.addEventListener('keydown', handleDelete);
-  //     return () => window.removeEventListener('keydown', handleDelete);
-  //   }
-  // }, [selected]);
   const width = data.width || 100;
   const height = data.height || 100;
   const style: React.CSSProperties = {};
@@ -102,19 +93,30 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
   const showOpen = () => {
     const node = store.getNode(props.id);
     console.log('node eidt', node);
-    if (node) {
-      const dataType: string = (node?.data?.dataType as string) || '';
-      if (dataType && dataType?.startsWith('image')) {
-        message.error('不支持编辑图片');
-        return;
-      } else if (dataType) {
-        message.error('不支持编辑');
-        return;
-      }
-      wallStore.checkAndOpen(true, node);
-    } else {
-      message.error('节点不存在');
-    }
+    app.call({
+      path: 'panels',
+      key: 'add-editor-window',
+      payload: {
+        data: {
+          pageId: wallStore.id || 'local-browser',
+          type: 'wallnote',
+          nodeData: node,
+        },
+      },
+    });
+    // if (node) {
+    //   const dataType: string = (node?.data?.dataType as string) || '';
+    //   if (dataType && dataType?.startsWith('image')) {
+    //     message.error('不支持编辑图片');
+    //     return;
+    //   } else if (dataType) {
+    //     message.error('不支持编辑');
+    //     return;
+    //   }
+    //   wallStore.checkAndOpen(true, node);
+    // } else {
+    //   message.error('节点不存在');
+    // }
   };
   const handleSize = Math.max(10, 10 / zoom);
   return (

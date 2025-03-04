@@ -1,4 +1,5 @@
 import { app, page, load } from './app';
+import '../src/routes';
 import './ai-app/main';
 import './tailwind.css';
 import './workspace/entry';
@@ -8,6 +9,7 @@ page.addPage('/', 'workspace');
 const runLoad = () => {
   load.load(
     () => {
+      console.log('runLoad');
       // @TODO 这里需要优化，不能每次都去调用
       page.subscribe(
         'workspace',
@@ -36,4 +38,4 @@ const runLoad = () => {
   );
 };
 
-// runLoad()
+runLoad()

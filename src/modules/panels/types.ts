@@ -6,6 +6,19 @@ export interface WindowPosition {
   height: number;
   zIndex: number;
 }
+export type WindowCommand = {
+  path: string;
+  key?: string;
+  payload?: any;
+};
+export type WindowCommandData = {
+  command: WindowCommand;
+  title: string;
+  key: string;
+  description?: string;
+  icon?: string;
+  onClick?: WindowCommand;
+};
 export interface WindowData {
   // 窗口的唯一标识
   id: string;
@@ -34,18 +47,13 @@ export interface WindowData {
   // 是否显示更多工具
   showMoreTools?: boolean;
   // 更多工具
-  moreTools?: MoreTool[];
-  // 当隐藏窗口存在，只关闭隐藏窗口，不退出程序
-  onHidden?: () => void;
-}
-export interface MoreTool {
-  // 工具的名称
-  title?: string;
-  description?: string;
-  path?: string;
-  key?: string;
-  // 工具的图标
-  icon?: string;
-  // 工具的点击事件
-  onClick?: () => void;
+  moreTools?: WindowCommandData[];
+  // 工具列表
+  commandList?: WindowCommandData[];
+  // 渲染
+  render?: {
+    command: WindowCommand;
+    props?: any;
+    className?: string;
+  };
 }

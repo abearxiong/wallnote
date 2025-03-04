@@ -60,7 +60,7 @@ export const createSuggestionConfig = (items: CommandItem[]) => {
           popup = document.createElement('div');
           popup.className = 'commands-popup';
           popup.style.position = 'fixed'; // Use fixed instead of absolute for better viewport positioning
-          popup.style.zIndex = '1000';
+          popup.style.zIndex = '9999';
           document.body.appendChild(popup);
 
           popup.appendChild(component.element);

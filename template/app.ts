@@ -28,6 +28,7 @@ export const queryAI = useContextKey<QueryAI>('queryAI', () => {
   return new QueryAI();
 });
 
+export const rootEl = document.getElementById('root') as HTMLElement;
 export const initAIAppRootOrCreate = () => {
   const root = document.getElementById('ai-root');
   if (!root) {

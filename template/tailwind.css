@@ -12,14 +12,14 @@
 
 /* # 背景设置为透明 */
 #ai-root {
-  /* @apply bg-transparent */
+  @apply bg-transparent;
   @apply border-none box-border border-2 border-gray-300 rounded-md;
   @apply pointer-events-none;
 }
 #ai-root {
   .node-editor {
     @apply pointer-events-auto;
-    @apply absolute bottom-0 left-0 w-full h-[20vh] border border-gray-300 shadow-md;
+    @apply absolute bottom-0 left-0 w-full border border-gray-300 shadow-md;
     .tiptap {
       @apply mx-0 h-full overflow-y-auto;
     }
@@ -28,5 +28,3 @@
     @apply w-full h-full overflow-hidden;
   }
 }
-
-

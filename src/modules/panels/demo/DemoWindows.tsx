@@ -1,6 +1,6 @@
 import { WindowData } from '../types';
 
-export const createEditorWindow = (data: any): WindowData => {
+export const createDemoEditorWindow = (data: any): WindowData => {
   return {
     ...data,
     showTitle: true,
@@ -104,17 +104,17 @@ const windowPositions = {
 
 // Demo windows data using the createEditorWindow function
 export const demoWindows: WindowData[] = [
-  createEditorWindow({ title: 'Welcome', id: 'window1', type: 'welcome' }),
-  createEditorWindow({ title: 'Image Viewer', id: 'window2', type: 'image' }),
-  createEditorWindow({ title: 'Text Editor', id: 'window3', type: 'document' }),
-  createEditorWindow({ title: 'Calculator', id: 'window4', type: 'calculator' }),
-  createEditorWindow({ title: 'Code Editor', id: 'code-editor', type: 'code' }),
-  createEditorWindow({ title: 'Document', id: 'document', type: 'document' }),
-  createEditorWindow({ title: 'Analytics', id: 'analytics', type: 'analytics' }),
-  createEditorWindow({ title: 'Settings', id: 'settings', type: 'settings' }),
-  createEditorWindow({ title: 'Layers', id: 'layers', type: 'layers' }),
-  createEditorWindow({ title: 'Database', id: 'database', type: 'database' }),
-  createEditorWindow({ title: 'Server', id: 'server', type: 'server' }),
-  createEditorWindow({ title: 'Terminal', id: 'terminal', type: 'terminal' }),
-  createEditorWindow({ title: 'Command', id: 'command', type: 'command' }),
+  createDemoEditorWindow({ title: 'Welcome', id: 'window1', type: 'welcome' }),
+  createDemoEditorWindow({ title: 'Image Viewer', id: 'window2', type: 'image' }),
+  createDemoEditorWindow({ title: 'Text Editor', id: 'window3', type: 'document' }),
+  createDemoEditorWindow({ title: 'Calculator', id: 'window4', type: 'calculator' }),
+  createDemoEditorWindow({ title: 'Code Editor', id: 'code-editor', type: 'code' }),
+  createDemoEditorWindow({ title: 'Document', id: 'document', type: 'document' }),
+  createDemoEditorWindow({ title: 'Analytics', id: 'analytics', type: 'analytics' }),
+  createDemoEditorWindow({ title: 'Settings', id: 'settings', type: 'settings' }),
+  createDemoEditorWindow({ title: 'Layers', id: 'layers', type: 'layers' }),
+  createDemoEditorWindow({ title: 'Database', id: 'database', type: 'database' }),
+  createDemoEditorWindow({ title: 'Server', id: 'server', type: 'server' }),
+  createDemoEditorWindow({ title: 'Terminal', id: 'terminal', type: 'terminal' }),
+  createDemoEditorWindow({ title: 'Command', id: 'command', type: 'command' }),
 ].map((window) => ({ ...window, position: windowPositions[window.id] }));

@@ -1,8 +1,6 @@
-import { createRoot, Root } from 'react-dom/client';
-import { AiApp } from './AiApp';
+import { createRoot } from 'react-dom/client';
 import { app, initAIAppRootOrCreate, useContextKey } from '../app';
-import { Editor } from '@/pages/editor/index';
-import { ExampleApp } from '@/modules/panels/Example';
+import { Panels } from '@/modules/panels/index';
 initAIAppRootOrCreate();
 
 app
@@ -12,15 +10,11 @@ app
     description: '渲染AI应用',
     run: async (ctx) => {
       const root = initAIAppRootOrCreate();
-      console.log('ai render');
-      console.log('ai render', root);
       if (!root) {
         return;
       }
       const aiRoot = createRoot(root!);
-      // aiRoot.render(<Editor />);
-      // aiRoot.render(<AiApp />);
-      aiRoot.render(<ExampleApp />);
+      aiRoot.render(<Panels />);
       useContextKey('aiRoot', () => aiRoot, true);
       ctx.body = 'aiRoot';
     },

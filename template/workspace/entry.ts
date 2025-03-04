@@ -15,15 +15,16 @@ app
         return;
       }
       console.log('workspace enter');
+      console.log('workspace enter', isRender);
       if (!isRender) {
-        app.call({
+        const res = await app.call({
           path: 'wallnote',
           key: 'render',
         });
+        console.log('res', res);
         isRender = true;
       }
       ctx.body = '';
     },
   })
   .addTo(app);
-

@@ -57,6 +57,8 @@ interface WallState {
   clearId: () => Promise<void>;
   mouseSelect: boolean;
   setMouseSelect: (mouseSelect: boolean) => void;
+  getNodeById: (id: string) => Promise<NodeData | null>;
+  saveNodeById: (id: string, data: any) => Promise<void>;
 }
 
 export const useWallStore = create<WallState>((set, get) => ({
@@ -72,7 +74,6 @@ export const useWallStore = create<WallState>((set, get) => ({
     if (!get().id) {
       const covertData = getNodeData(nodes);
       setWallData({ nodes: covertData });
-      showMessage && message.success('保存到本地');
     } else {
       const { id } = get();
       const userWallStore = useUserWallStore.getState();
@@ -201,4 +202,28 @@ export const useWallStore = create<WallState>((set, get) => ({
   },
   mouseSelect: true,
   setMouseSelect: (mouseSelect) => set({ mouseSelect }),
+  getNodeById: async (id: string) => {
+    const data = await getWallData();
+    const nodes = data?.nodes || [];
+    return nodes.find((node) => node.id === id);
+  },
+  saveNodeById: async (id: string, data: any) => {
+    let node = await get().getNodeById(id);
+    if (node) {
+      node.data = {
+        ...node.data,
+        ...data,
+      };
+      const newNodes = get().nodes.map((item) => {
+        if (item.id === id) {
+          return node;
+        }
+        return item;
+      });
+      set({
+        nodes: newNodes,
+      });
+      get().saveNodes(newNodes, { showMessage: false });
+    }
+  },
 }));

@@ -5,7 +5,7 @@ export const useListenCmdB = (callback: () => void) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Command key on macOS
-      if (isMac ? event.metaKey && event.key === 'b' : event.ctrlKey && event.key === 'b') {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
         callback();
       }
     };

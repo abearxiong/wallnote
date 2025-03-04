@@ -22,8 +22,12 @@
   right: 0 !important;
   bottom: 40px !important; /* Leave space for taskbar */
   width: 100% !important;
-  height: calc(100% - 40px) !important;
-  z-index: 9999 !important;
+  height: calc(100% - 40px);
+  z-index: 9900 !important;
+}
+
+.fullscreen.hidden-taskbar {
+  height: calc(100% - 0px) !important;
 }
 
 /* Resize handles */

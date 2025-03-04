@@ -20,14 +20,12 @@
   "license": "MIT",
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
-    "@blueprintjs/core": "^5.17.2",
-    "@blueprintjs/icons": "^5.19.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@kevisual/cache": "^0.0.1",
     "@kevisual/query": "0.0.9-alpha.2",
-    "@kevisual/router": "0.0.8",
-    "@kevisual/system-lib": "0.0.21-beta.2",
+    "@kevisual/router": "0.0.9",
+    "@kevisual/system-lib": "0.0.21-beta.3",
     "@kevisual/system-ui": "^0.0.3",
     "@kevisual/ui": "^0.0.4-alpha-1",
     "@mui/material": "^6.4.6",
@@ -47,6 +45,7 @@
     "@xyflow/react": "^12.4.4",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "eventemitter3": "^5.0.1",
     "github-markdown-css": "^5.8.1",
     "highlight.js": "^11.11.1",
     "idb": "^8.0.2",
@@ -73,7 +72,7 @@
     "@eslint/js": "^9.21.0",
     "@kevisual/types": "^0.0.6",
     "@tailwindcss/vite": "^4.0.9",
-    "@types/node": "^22.13.8",
+    "@types/node": "^22.13.9",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/react-resizable": "^3.0.8",
@@ -87,7 +86,7 @@
     "tailwindcss": "^4.0.9",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.25.0",
+    "typescript-eslint": "^8.26.0",
     "vite": "^6.2.0"
   }
 }
