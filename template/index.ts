@@ -3,6 +3,7 @@ import '../src/routes';
 import './ai-app/main';
 import './tailwind.css';
 import './workspace/entry';
+import './routes';
 
 page.addPage('/', 'workspace');
 

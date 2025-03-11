@@ -2,19 +2,19 @@ import { MyCache } from '@kevisual/cache';
 
 const cache = new MyCache('cacheWall');
 
-export async function getWallData() {
+export async function getCacheWallData(key?: string) {
   try {
-    const data = await cache.getData();
+    const data = await cache.get(key ?? 'cacheWall');
     return data;
   } catch (e) {
     cache.del();
   }
 }
 
-export async function setWallData(data: any) {
-  await cache.setData(data);
+export async function setCacheWallData(data: any, key?: string) {
+  await cache.set(key ?? 'cacheWall', data);
 }
 
-export async function clearWallData() {
+export async function clearCacheWallData() {
   await cache.del();
 }

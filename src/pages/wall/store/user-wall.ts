@@ -30,8 +30,11 @@ interface UserWallStore {
   wallList: Wall[];
   queryWallList: () => Promise<void>;
   logout: () => void;
-  saveWall: (data: Wall, opts?: { refresh?: boolean, showMessage?: boolean }) => Promise<any>;
-  queryWall: (id: string) => Promise<any>;
+  saveWall: (data: Wall, opts?: { refresh?: boolean; showMessage?: boolean }) => Promise<any>;
+  saveOneNode: (id: string, node: any) => Promise<any>;
+  saveDataNodes: (id: string, nodes: any[], opts?: { showMessage?: boolean }) => Promise<any>;
+  queryWall: (id?: string) => Promise<any>;
+  queryWallVersion: (id?: string) => Promise<any>;
   deleteWall: (id: string) => Promise<any>;
 }
 
@@ -66,7 +69,7 @@ export const useUserWallStore = create<UserWallStore>((set, get) => ({
       set({ wallList: res.data.list });
     }
   },
-  saveWall: async (data: Wall, opts?: { refresh?: boolean, showMessage?: boolean }) => {
+  saveWall: async (data: Wall, opts?: { refresh?: boolean; showMessage?: boolean }) => {
     const { queryWallList } = get();
     const res = await query.post({
       path: 'mark',
@@ -81,7 +84,27 @@ export const useUserWallStore = create<UserWallStore>((set, get) => ({
     }
     return res;
   },
-  queryWall: async (id: string) => {
+  saveOneNode: async (id: string, node: any) => {
+    const res = await query.post({
+      path: 'mark',
+      key: 'updateNode',
+      data: { id, node },
+    });
+    return res;
+  },
+  saveDataNodes: async (id: string, nodeOperateList: any[], opts?: { showMessage?: boolean }) => {
+    const res = await query.post({
+      path: 'mark',
+      key: 'updateNodes',
+      data: { id, nodeOperateList },
+    });
+    if (res.code === 200) {
+      opts?.showMessage && message.success('保存成功');
+      return res;
+    }
+    return res;
+  },
+  queryWall: async (id?: string) => {
     const res = await query.post({
       path: 'mark',
       key: 'get',
@@ -93,6 +116,14 @@ export const useUserWallStore = create<UserWallStore>((set, get) => ({
     const res = await query.post({
       path: 'mark',
       key: 'delete',
+      id,
+    });
+    return res;
+  },
+  queryWallVersion: async (id?: string) => {
+    const res = await query.post({
+      path: 'mark',
+      key: 'getVersion',
       id,
     });
     return res;

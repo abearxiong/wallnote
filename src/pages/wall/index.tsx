@@ -20,7 +20,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCheckDoubleClick } from './hooks/check-double-click';
 import { randomId } from './utils/random';
 import { CustomNodeType } from './modules/CustomNode';
-import Drawer from './modules/Drawer';
 import { message } from '@/modules/message';
 import { useShallow } from 'zustand/react/shallow';
 import { BlankNoteText } from './constants';
@@ -33,6 +32,7 @@ import { useListenPaster } from './hooks/listen-copy';
 import { ContextMenu } from './modules/ContextMenu';
 import { useSelect } from './hooks/use-select';
 import clsx from 'clsx';
+import { AppendDemo, DemoLogin } from '../demo-login';
 type NodeData = {
   id: string;
   position: XYPosition;
@@ -47,6 +47,7 @@ export function FlowContent() {
       return {
         nodes: state.nodes,
         saveNodes: state.saveNodes,
+        saveDataNode: state.saveDataNode,
         checkAndOpen: state.checkAndOpen,
         mouseSelect: state.mouseSelect, // 鼠标模式,不能拖动
         setMouseSelect: state.setMouseSelect,
@@ -69,7 +70,7 @@ export function FlowContent() {
       wallStore.saveNodes(reactFlowInstance.getNodes().filter((item) => item.id !== change.id));
     }
     if (change.type === 'position' && change.dragging === false) {
-      getNewNodes(false);
+      getNewNodes(false, changes);
     }
     onNodesChange(changes);
   }, []);
@@ -96,9 +97,15 @@ export function FlowContent() {
   const onNodeDoubleClick = (event, node) => {
     wallStore.checkAndOpen(true, node);
   };
-  const getNewNodes = (showMessage = true) => {
+  const getNewNodes = (showMessage = true, changes?: NodeChange[]) => {
     const nodes = reactFlowInstance.getNodes();
-    wallStore.saveNodes(nodes, { showMessage: showMessage });
+    // wallStore.saveNodes(nodes, { showMessage: showMessage });
+    // console.log('change', changes);
+    const operateNodes = nodes.filter((node) => {
+      return changes?.some((change) => change.type === 'position' && change.id === node.id);
+    });
+    console.log('operateNodes', operateNodes);
+    wallStore.saveDataNode(operateNodes);
   };
   useEffect(() => {
     if (mount) {
@@ -125,7 +132,8 @@ export function FlowContent() {
     });
     setTimeout(() => {
       wallStore.checkAndOpen(true, newNode);
-      getNewNodes();
+      // getNewNodes();
+      wallStore.saveDataNode([newNode]);
     }, 200);
   };
   const hasFoucedNode = useMemo(() => {
@@ -187,11 +195,10 @@ export function FlowContent() {
             <Toolbar />
           </Panel>
           <Panel>
-            <Drawer />
             <SaveModal />
             {contextMenu && <ContextMenu x={contextMenu.x} y={contextMenu.y} onClose={handleCloseContextMenu} />}
           </Panel>
-        </ReactFlow>{' '}
+        </ReactFlow>
         {isSelecting && selectionBox && (
           <div
             style={{
@@ -209,10 +216,11 @@ export function FlowContent() {
     </>
   );
 }
-export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
-  // const { id } = useParams();
-  const id = '';
-  // const navigate = useNavigate();
+export const Flow = ({ id }: { checkLogin?: boolean; id?: string }) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <DemoLogin />;
+  }
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
@@ -225,23 +233,14 @@ export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
 
   useEffect(() => {
     wallStore.init(id);
-    console.log('checkLogin', checkLogin, id);
-  }, [id, checkLogin]);
+  }, [id]);
 
   if (!wallStore.loaded) {
     return <div>loading...</div>;
   } else if (wallStore.loaded === 'error') {
     return (
       <div className='flex flex-col items-center justify-center h-screen gap-4'>
-        <div className='text-2xl font-bold'>获取失败，请稍后刷新重试,或者转到首页</div>
-        <Button
-          variant='contained'
-          onClick={() => {
-            // navigate('/');
-            wallStore.clearId();
-          }}>
-          转到首页
-        </Button>
+        <div className='text-2xl font-bold'>获取失败，请稍后刷新重试</div>
       </div>
     );
   }
@@ -249,15 +248,5 @@ export const Flow = ({ checkLogin = true }: { checkLogin?: boolean }) => {
     <ReactFlowProvider>
       <FlowContent />
     </ReactFlowProvider>
-  );
-};
-export const FlowStatus = () => {
-  const { nodes } = useWallStore();
-  const reactFlow = useReactFlow();
-  const flowStore = useStore((state) => state);
-  return (
-    <div>
-      <div>节点数量: {nodes.length}</div>
-    </div>
   );
 };

@@ -4,6 +4,7 @@ import { useContextKey } from '@kevisual/system-lib/dist/web-config';
 import './index.css';
 import { QueryRouterServer } from '@kevisual/system-lib/dist/router-browser';
 import { NodeTextEditor } from './pages/editor/NodeTextEditor.tsx';
+import { AiEditor } from './pages/editor/index.tsx';
 import { Panels } from './modules/panels/index.tsx';
 import { Page } from '@kevisual/system-lib/dist/web-page';
 
@@ -39,7 +40,7 @@ app
 app
   .route({
     path: 'editor',
-    key: 'render',
+    key: 'nodeRender',
     description: '获取编辑器',
   })
   .define(async (ctx) => {
@@ -47,6 +48,16 @@ app
   })
   .addTo(app);
 
+app
+  .route({
+    path: 'editor',
+    key: 'render',
+    description: '获取编辑器',
+  })
+  .define(async (ctx) => {
+    ctx.body = { lib: AiEditor, type: 'react', Panels };
+  })
+  .addTo(app);
 app
   .route({
     path: 'editor',

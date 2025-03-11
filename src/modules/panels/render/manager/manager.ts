@@ -38,6 +38,8 @@ export class BaseRender {
     // @ts-ignore
     const app = (await useContextKey('app')) as QueryRouterServer;
     const render = windowData.render;
+    console.log('base render', render, render?.command);
+
     if (render?.command) {
       const res = await app.call({
         path: render.command.path,
@@ -65,6 +67,8 @@ export class BaseRender {
             data: windowData,
           });
         }
+      } else {
+        console.log('render error', res);
       }
     }
   }

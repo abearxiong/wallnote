@@ -22,3 +22,14 @@ export function SplitButtons({ closeToast }: ToastContentProps) {
     </div>
   );
 }
+
+//   toast(SplitButtons, {
+//     closeButton: false,
+//     className: 'p-0 w-[400px] border border-purple-600/40',
+//     ariaLabel: 'Email received',
+//     onClose: (reason) => {
+//       if (reason === 'success') {
+//         set({ open: true, selectedNode: data, hasEdited: false });
+//       }
+//     },
+//   });

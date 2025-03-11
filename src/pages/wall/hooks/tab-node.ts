@@ -4,10 +4,10 @@ import { useWallStore } from '../store/wall';
 import { useShallow } from 'zustand/react/shallow';
 export const useTabNode = () => {
   const reactFlowInstance = useReactFlow();
-  const open = useWallStore(useShallow((state) => state.open));
   useEffect(() => {
-    if (open) return;
     const listener = (event: any) => {
+      const selected = reactFlowInstance.getNodes().find((node) => node.selected);
+      if (!selected) return;
       if (event.key === 'Tab') {
         const nodes = reactFlowInstance.getNodes();
         const selectedNode = nodes.find((node) => node.selected);
@@ -56,9 +56,19 @@ export const useTabNode = () => {
         event.stopPropagation();
       }
     };
+    const rightClickListener = (event: any) => {
+      const selected = reactFlowInstance.getNodes().find((node) => node.selected);
+      if (!selected) return;
+      if (event.button === 2) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
     window.addEventListener('keydown', listener);
+    window.addEventListener('contextmenu', rightClickListener);
     return () => {
       window.removeEventListener('keydown', listener);
+      window.removeEventListener('contextmenu', rightClickListener);
     };
-  }, [reactFlowInstance, open]);
+  }, [reactFlowInstance]);
 };

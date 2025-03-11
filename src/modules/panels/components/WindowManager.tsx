@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect, RefObject } from 'react';
-import { Maximize2, Minimize2, Minimize, Expand, X, SquareMinus, Maximize, ChevronDown, CommandIcon } from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect, RefObject, useMemo } from 'react';
+import { Maximize2, Minimize2, Minimize, Expand, X, SquareMinus, Maximize, ChevronDown, CommandIcon, LogOut } from 'lucide-react';
 import { WindowData, WindowPosition } from '../types';
 import classNames from 'clsx';
 import Draggable from 'react-draggable';
@@ -273,8 +273,23 @@ const WindowManager = React.forwardRef(({ windows: initialWindows, showTaskbar =
     //     window.removeEventListener('resize', handleResize);
     //   };
     // }, []);
+    const showLogout = useMemo(() => {
+      return localStorage.getItem('token');
+    }, []);
     return (
       <div className=' pointer-events-auto  fixed w-full overflow-x-auto bottom-0 left-0 right-0 bg-gray-200 text-white p-2 flex space-x-2 z-[9000] h-[40px]'>
+        {showLogout && (
+          <div
+          className='flex items-center  space-x-2 cursor-pointer bg-blue-600 rounded-md p-1'
+          onClick={() => {
+            context?.app?.call?.({
+              path: 'user',
+              key: 'logout',
+            });
+          }}>
+            <LogOut size={16} />
+          </div>
+        )}
         <div
           className='flex items-center  space-x-2 cursor-pointer bg-blue-600 rounded-md p-1'
           onClick={() => {

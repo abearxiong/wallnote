@@ -1,5 +1,7 @@
 @import 'tailwindcss';
-
+:root {
+  --xy-resize-background-color: #000;
+}
 @layer components {
   .node-editor {
     @apply w-full h-full bg-white;
@@ -27,10 +29,10 @@
 
 :root {
   --purple-light: #e0e0ff; /* 默认浅紫色背景 */
-  --black: #000000;       /* 默认黑色 */
-  --white: #ffffff;       /* 默认白色 */
-  --gray-3: #d3d3d3;      /* 默认灰色3 */
-  --gray-2: #e5e5e5;      /* 默认灰色2 */
+  --black: #000000; /* 默认黑色 */
+  --white: #ffffff; /* 默认白色 */
+  --gray-3: #d3d3d3; /* 默认灰色3 */
+  --gray-2: #e5e5e5; /* 默认灰色2 */
 }
 .tiptap-preview {
   .tiptap {
@@ -80,7 +82,7 @@
 .tiptap h2 {
   /* margin-top: 3.5rem; */
   margin-top: 1rem;
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 }
 
 .tiptap h1 {
@@ -131,7 +133,7 @@
 }
 
 .tiptap mark {
-  background-color: #FAF594;
+  background-color: #faf594;
   border-radius: 0.4rem;
   box-decoration-break: clone;
   padding: 0.1rem 0.3rem;

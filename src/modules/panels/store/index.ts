@@ -90,7 +90,8 @@ export const usePanelStore = create<PanelStore>((set, get) => ({
 
     set({
       data: {
-        windows: [e.windowData],
+        // windows: [e.windowData],
+        windows: [],
         showTaskbar: true,
       },
     });
@@ -136,8 +137,9 @@ export const usePanelStore = create<PanelStore>((set, get) => ({
       const { width, height } = getDocumentWidthAndHeight();
       data.windows.push({
         id: '__ai__',
-        title: 'AI Command',
+        title: '🤖 AI Command',
         type: 'command',
+        showTitle: true,
         position: {
           x: 100,
           y: height - 200 - 40,
@@ -147,6 +149,15 @@ export const usePanelStore = create<PanelStore>((set, get) => ({
         },
         resizeHandles: ['se', 'sw', 'ne', 'nw', 's', 'w', 'n', 'e'],
         show: true,
+        render: {
+          command: {
+            path: 'editor',
+            key: 'render',
+            payload: {
+              id: '__ai__',
+            },
+          },
+        },
       });
     }
     // set({ data: { ...data, windows: data.windows } });
@@ -166,20 +177,20 @@ export const usePanelStore = create<PanelStore>((set, get) => ({
   },
 }));
 
-const e = createEditorWindow(
-  '123',
-  {
-    id: '123',
-    title: '123',
-    type: 'editor',
-    position: { x: 0, y: 0, width: 100, height: 100, zIndex: 1000 },
-  },
-  createDemoEditorWindow({
-    id: '123',
-    title: '123',
-    type: 'editor',
-    position: { x: 0, y: 0, width: 100, height: 100, zIndex: 1000 },
-  }),
-);
+// const e = createEditorWindow(
+//   '123',
+//   {
+//     id: '123',
+//     title: '123',
+//     type: 'editor',
+//     position: { x: 0, y: 0, width: 100, height: 100, zIndex: 1000 },
+//   },
+//   createDemoEditorWindow({
+//     id: '123',
+//     title: '123',
+//     type: 'editor',
+//     position: { x: 0, y: 0, width: 100, height: 100, zIndex: 1000 },
+//   }),
+// );
 
-console.log('e', e);
+// console.log('e', e);

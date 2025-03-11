@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, Chip } from '@mui/material';
 import { useShallow } from 'zustand/react/shallow';
 import { getNodeData, useWallStore } from '../store/wall';
@@ -94,44 +94,51 @@ export const SaveModal = () => {
   const { showFormDialog, setShowFormDialog, formDialogData, setFormDialogData } = wallStore;
   const reactFlowInstance = useReactFlow();
   // const navigate = useNavigate();
-  const { id } = wallStore;
-  const onSubmit = async (values) => {
-    const nodes = reactFlowInstance.getNodes();
-    const data = {
-      nodes: getNodeData(nodes),
-    };
-    const fromData = {
-      title: values.title,
-      description: values.description,
-      summary: values.summary,
-      tags: values.tags,
-      markType: 'wallnote' as 'wallnote',
-      data,
-    } as Wall;
-    if (id) {
-      fromData.id = id;
-    }
-    const loading = message.loading('保存中...');
-    const res = await userWallStore.saveWall(fromData, { refresh: false });
-    message.close(loading);
-    if (res.code === 200) {
-      setShowFormDialog(false);
+  const onSubmit = useCallback(
+    async (values) => {
+      const { id } = wallStore;
       if (!id) {
-        // 新创建
-        const data = res.data;
-        message.info('redirect to edit page');
-        wallStore.clear();
-        setTimeout(() => {
-          // navigate(`/edit/${data.id}`);
-        }, 2000);
-      } else {
-        // 编辑
-        wallStore.setData(res.data);
+        message.error('请先保存到账号');
+        return;
       }
-    } else {
-      message.error('保存失败');
-    }
-  };
+      const nodes = reactFlowInstance.getNodes();
+      const data = {
+        nodes: getNodeData(nodes),
+      };
+      const fromData = {
+        title: values.title,
+        description: values.description,
+        summary: values.summary,
+        tags: values.tags,
+        markType: 'wallnote' as 'wallnote',
+        data,
+      } as Wall;
+      if (id) {
+        fromData.id = id;
+      }
+      const loading = message.loading('保存中...');
+      const res = await userWallStore.saveWall(fromData, { refresh: false });
+      message.close(loading);
+      if (res.code === 200) {
+        setShowFormDialog(false);
+        if (!id) {
+          // 新创建
+          const data = res.data;
+          message.info('redirect to edit page');
+          wallStore.clear();
+          setTimeout(() => {
+            // navigate(`/edit/${data.id}`);
+          }, 2000);
+        } else {
+          // 编辑
+          wallStore.setData(res.data);
+        }
+      } else {
+        message.error('保存失败');
+      }
+    },
+    [reactFlowInstance, wallStore.id],
+  );
   if (!showFormDialog) {
     return null;
   }

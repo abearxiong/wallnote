@@ -43,7 +43,7 @@ export const createEditorWindow = (pageId: string, nodeData: any, windowData?: W
       render: {
         command: {
           path: 'editor',
-          key: 'render',
+          key: 'nodeRender',
           payload: {
             pageId: pageId,
             id: nodeData.id,

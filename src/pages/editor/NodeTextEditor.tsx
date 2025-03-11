@@ -30,6 +30,11 @@ export const useListenCtrlS = (saveContent: () => void, exitEdit: () => void) =>
 type EditorProps = {
   id?: string;
 };
+/**
+ * Node Edit Editor
+ * @param param0
+ * @returns
+ */
 export const NodeTextEditor = ({ id }: EditorProps) => {
   const textEditorRef = useRef<TextEditor | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -61,7 +66,7 @@ export const NodeTextEditor = ({ id }: EditorProps) => {
   };
   const exitEdit = () => {
     // 退出编辑
-    saveContent()
+    saveContent();
     setTimeout(() => {
       app.call({
         path: 'panels',

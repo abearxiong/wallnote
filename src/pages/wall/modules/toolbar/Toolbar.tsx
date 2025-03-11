@@ -130,115 +130,42 @@ export const ToolbarContent = ({ open }) => {
         }
       },
     },
-    {
-      label: '清空',
-      key: 'clear',
-      icon: <Trash />,
-      onClick: async () => {
-        await wallStore.clear();
-        message.success('清空成功');
-        store.setNodes([]);
-      },
-    },
   ];
-  if (hasLogin) {
-    menuList.unshift({
-      label: '我的笔记',
-      key: 'myWall',
-      icon: <BrickWall />,
-      onClick: () => {
-        //
-      },
-    });
-  }
-  if (!hasLogin) {
-    menuList.push({
-      label: '登录',
-      key: 'login',
-      icon: <User />,
-      onClick: () => {
-        redirectToLogin();
-      },
-    });
-    if (wallStore.id) {
-      menuList.push({
-        label: '删除',
-        key: 'delete',
-        icon: <Trash />,
-        onClick: async () => {
-          const res = await userWallStore.deleteWall(wallStore.id!);
-          if (res.code === 200) {
-            // navigate('/');
-          }
-        },
-      });
-    }
-  } else {
-    if (!wallStore.id) {
-      menuList.push({
-        label: '保存到账号',
-        key: 'saveToAccount',
-        icon: <Save />,
-        onClick: () => {
-          wallStore.setShowFormDialog(true);
-          wallStore.setFormDialogData({
-            title: '',
-            description: '',
-            tags: [],
-            summary: '',
-          });
-        },
-      });
-    } else {
-      menuList.push({
-        label: '编辑信息',
-        key: 'saveToAccount',
-        icon: <Save />,
-        onClick: () => {
-          wallStore.setShowFormDialog(true);
-          const data = wallStore.data;
-          wallStore.setFormDialogData({
-            title: data?.title,
-            description: data?.description,
-            tags: data?.tags,
-            summary: data?.summary,
-          });
-        },
-      });
-      menuList.push({
-        label: '新增',
-        key: 'add',
-        icon: <Plus />,
-        onClick: () => {
-          // navigate(`/`);
-          wallStore.clearQueryWall();
-        },
-      });
-      menuList.push({
-        label: '删除',
-        key: 'delete',
-        icon: <Trash />,
-        className: 'text-red-500',
-        onClick: async () => {
-          const res = await userWallStore.deleteWall(wallStore.id!);
-          if (res.code === 200) {
-            message.success('删除成功，返回首页');
-            wallStore.clearQueryWall();
-            // navigate('/');
-          }
-        },
-      });
-    }
+  menuList.push({
+    label: '删除',
+    key: 'delete',
+    icon: <Trash />,
+    onClick: async () => {
+      const res = await userWallStore.deleteWall(wallStore.id!);
+      if (res.code === 200) {
+        // navigate('/');
+      }
+    },
+  });
 
-    menuList.push({
-      label: '退出  ',
-      key: 'logout',
-      icon: <User />,
-      onClick: () => {
-        userWallStore.logout();
-      },
-    });
-  }
+  menuList.push({
+    label: '编辑信息',
+    key: 'saveToAccount',
+    icon: <Save />,
+    onClick: () => {
+      wallStore.setShowFormDialog(true);
+      const data = wallStore.data;
+      wallStore.setFormDialogData({
+        title: data?.title,
+        description: data?.description,
+        tags: data?.tags,
+        summary: data?.summary,
+      });
+    },
+  });
+  menuList.push({
+    label: '退出  ',
+    key: 'logout',
+    icon: <User />,
+    onClick: () => {
+      userWallStore.logout();
+    },
+  });
   return (
     <ClickAwayListener onClickAway={() => wallStore.setToolbarOpen(false)}>
       <div className=' flex flex-col items-center w-[200px] bg-white border border-gray-300 rounded-md absolute top-0 left-8'>

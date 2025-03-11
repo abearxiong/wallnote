@@ -12,13 +12,10 @@ export type WallData<T = Record<string, any>> = {
   html: string;
   width?: number;
   height?: number;
+  updatedAt?: number;
   [key: string]: any;
 } & T;
-const ShowContent = (props: { data: WallData; selected: boolean }) => {
-  const html = props.data.html;
-  const selected = props.selected;
-  const showRef = useRef<HTMLDivElement>(null);
-  if (!html) return <div className='w-full h-full flex items-center justify-center '>空</div>;
+const ShowContent = (props: { data: WallData; id: string; selected: boolean }) => {
   const [highlightHtml, setHighlightHtml] = useState('');
   const highlight = async (html: string) => {
     const _html = html.replace(/<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g, (match, p1, p2) => {
@@ -27,19 +24,23 @@ const ShowContent = (props: { data: WallData; selected: boolean }) => {
     return _html;
   };
   useEffect(() => {
-    highlight(html).then((res) => {
+    highlight(props.data.html).then((res) => {
       setHighlightHtml(res);
     });
-  }, [html]);
-
+  }, [props.data.html]);
+  useEffect(() => {
+    const id = props.id;
+    const container = document.querySelector('.id' + id);
+    if (container) {
+      container.innerHTML = highlightHtml;
+    }
+  }, [highlightHtml, props.data.updatedAt]);
   return (
     <div
-      ref={showRef}
-      className='p-2 w-full h-full overflow-y-auto scrollbar tiptap bg-white markdown-body'
+      className={clsx('p-2 w-full h-full overflow-y-auto scrollbar tiptap bg-white markdown-body', {}, 'id' + props.id)}
       style={{
-        pointerEvents: selected ? 'auto' : 'none',
-      }}
-      dangerouslySetInnerHTML={{ __html: highlightHtml }}></div>
+        pointerEvents: props.selected ? 'auto' : 'none',
+      }}></div>
   );
 };
 
@@ -52,7 +53,6 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
     useShallow((state) => {
       return {
         id: state.id,
-        setSelectedNode: state.setSelectedNode,
         saveNodes: state.saveNodes,
         checkAndOpen: state.checkAndOpen,
       };
@@ -87,9 +87,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
   });
   const width = data.width || 100;
   const height = data.height || 100;
-  const style: React.CSSProperties = {};
-  style.width = width;
-  style.height = height;
+
   const showOpen = () => {
     const node = store.getNode(props.id);
     console.log('node eidt', node);
@@ -104,33 +102,33 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
         },
       },
     });
-    // if (node) {
-    //   const dataType: string = (node?.data?.dataType as string) || '';
-    //   if (dataType && dataType?.startsWith('image')) {
-    //     message.error('不支持编辑图片');
-    //     return;
-    //   } else if (dataType) {
-    //     message.error('不支持编辑');
-    //     return;
-    //   }
-    //   wallStore.checkAndOpen(true, node);
-    // } else {
-    //   message.error('节点不存在');
-    // }
   };
-  const handleSize = Math.max(10, 10 / zoom);
+  const handleSize = Math.max(8, 8 / zoom);
   return (
     <>
+      <div
+        className={clsx('absolute -top-2 left-0  bg-gray-300 z-10 w-full h-2 custom-dragger cursor-move', {
+          'opacity-0': !props.selected,
+        })}
+        style={{
+          width: `calc(100% + ${handleSize}px)`,
+          transform: `translateX(-${handleSize / 2}px)`,
+        }}></div>
       <div
         ref={contentRef}
         onDoubleClick={(e) => {
           showOpen();
-          // e.stopPropagation();
           e.preventDefault();
         }}
-        className={clsx('w-full h-full border relative border-gray-300  min-w-[100px] min-h-[50px] tiptap-preview')}
-        style={style}>
-        <ShowContent data={data} selected={props.selected} />
+        className={clsx('w-full h-full border relative border-gray-300  min-w-[100px] min-h-[50px] tiptap-preview', {
+          'pointer-events-none': !props.selected,
+          'pointer-events-auto': props.selected,
+        })}
+        style={{
+          width: width,
+          height: height,
+        }}>
+        <ShowContent data={data} id={props.id} selected={props.selected} />
       </div>
       <div className={clsx('absolute top-0 right-0 cursor-pointer', props.selected ? 'opacity-100' : 'opacity-0')}>
         <button
@@ -146,6 +144,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
         minHeight={50}
         onResizeStart={() => {}}
         isVisible={props.selected}
+        color='#d1d5dc'
         onResizeEnd={(e) => {
           const parent = contentRef.current?.parentElement;
           if (!parent) return;
@@ -161,6 +160,7 @@ export const CustomNode = (props: { id: string; data: WallData; selected: boolea
             ? {
                 width: handleSize,
                 height: handleSize,
+                border: 'unset',
               }
             : undefined
         }
