@@ -16,7 +16,7 @@ export const Commands = Extension.create({
   addOptions() {
     return {
       suggestion: {
-        char: '!',
+        char: '@',
         command: ({ editor, range, props }: any) => {
           editor
             .chain()

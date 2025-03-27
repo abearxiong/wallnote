@@ -33,6 +33,8 @@ import { ContextMenu } from './modules/ContextMenu';
 import { useSelect } from './hooks/use-select';
 import clsx from 'clsx';
 import { AppendDemo, DemoLogin } from '../demo-login';
+import { List } from './pages/List';
+
 type NodeData = {
   id: string;
   position: XYPosition;
@@ -221,6 +223,9 @@ export const Flow = ({ id }: { checkLogin?: boolean; id?: string }) => {
   if (!token) {
     return <DemoLogin />;
   }
+  if (!id) {
+    return <List />;
+  }
   const wallStore = useWallStore(
     useShallow((state) => {
       return {
@@ -232,7 +237,9 @@ export const Flow = ({ id }: { checkLogin?: boolean; id?: string }) => {
   );
 
   useEffect(() => {
-    wallStore.init(id);
+    if (id) {
+      wallStore.init(id);
+    }
   }, [id]);
 
   if (!wallStore.loaded) {

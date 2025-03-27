@@ -49,7 +49,7 @@ export class TextEditor {
         StarterKit, // 使用 StarterKit 包含基础功能
         Highlight,
         Placeholder.configure({
-          placeholder: 'Type ! to see commands (e.g., !today, !list !test )...',
+          placeholder: 'Type @ to see commands (e.g., @today, @list @test )...',
         }),
         Typography,
         Markdown,

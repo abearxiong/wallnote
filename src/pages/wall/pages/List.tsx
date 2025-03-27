@@ -3,9 +3,7 @@ import { useWallStore } from '../store/wall';
 import { useUserWallStore } from '../store/user-wall';
 import { useShallow } from 'zustand/react/shallow';
 import { formatDate, formatRelativeDate } from '../../../modules/dayjs';
-import { useNavigate } from 'react-router-dom';
 export const List = () => {
-  const navigate = useNavigate();
   const wallStore = useUserWallStore(
     useShallow((state) => {
       return {
@@ -19,6 +17,9 @@ export const List = () => {
   }, []);
   const init = () => {
     wallStore.queryWallList();
+  };
+  const navigate = (path: string) => {
+    window.location.href = path;
   };
   return (
     <div className='p-4 bg-white w-full h-full flex flex-col'>
@@ -37,7 +38,9 @@ export const List = () => {
                 key={wall.id}
                 className='p-4 border border-gray-200 w-80 rounded-md'
                 onClick={() => {
-                  navigate(`/edit/${wall.id}`);
+                  const url = new URL(location.href);
+                  url.searchParams.set('id', wall.id!);
+                  navigate(url.toString());
                 }}>
                 <div>
                   <div>{wall.title}</div>
